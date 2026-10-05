@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pilgrimage Travel Survey</title>
-  
+
   <link rel="stylesheet" href="style.css">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
     function googleTranslateElementInit() {
@@ -28,7 +28,7 @@
     <button type="button" id="resumeDraftBtn" autofocus>Resume Survey</button>
     <button type="button" id="freshDraftBtn">Start Fresh</button>
   </dialog>
-    
+
   <iframe name="googleSheetTarget" id="googleSheetTarget" style="display:none;"></iframe>
 
   <div class="floating-language">
@@ -50,6 +50,7 @@
   <h1>Pilgrimage Travel Survey</h1>
 
   <div id="progress-indicator">
+      <span class="step"></span>
       <span class="step"></span>
       <span class="step"></span>
       <span class="step"></span>
@@ -126,7 +127,7 @@
     </div>
 
   <div class="form-page" id="page-1-E">
-        <p class="fatigue-progress" style="text-align:right;">Page 8 of 9 · ~2 min</p>
+        <p class="fatigue-progress" style="text-align:right;">Page 9 of 10 · ~2 min</p>
         <h2>Section E: Respondent Profile & Demographics</h2>
         <p class="privacy-note">These details are collected near the end to help analyze travel patterns across different pilgrim groups. Your responses will be used only for academic research and planning purposes, and will not be shared publicly.</p>
         <h3>E1: Basic Demographic Characteristics</h3>
@@ -265,7 +266,7 @@
     </div>
 
   <div class="form-page" id="page-2-B">
-        <p class="fatigue-progress" style="text-align:right;">Page 2 of 9 · ~3 min</p>
+        <p class="fatigue-progress" style="text-align:right;">Page 2 of 10 · ~3 min</p>
         <h2>Section A: Current Travel Behaviour</h2>
 
         <h3>A1: Travel Group Characteristics</h3>
@@ -286,7 +287,7 @@
             <label class="answer-choice"><input type="radio" name="travelType" value="Group" required><span>Group (with others)</span></label>
           </div>
         </fieldset>
-        
+
         <label id="groupSizeLabel">Group size, including you:
           <span class="field-helper">Enter the total number of people travelling together.</span>
           <input type="number" name="groupSize" id="groupSize" min="1" value="1" required>
@@ -565,21 +566,23 @@
 
         <h3>A2: Visit History &amp; Frequency</h3>
         <p>For each shrine, mark how many times you visited before and whether it is included in this trip.</p>
-        <table class="grid-table">
+        <table class="grid-table" id="visitHistoryTable">
+          <colgroup><col class="visit-shrine-column"><col span="5"><col class="visit-current-column"></colgroup>
+          <thead>
           <tr>
-            <th>Shrine</th>
+            <th rowspan="2" scope="col">Shrine</th>
             <th colspan="5">Number of Previous Visits</th>
-            <th>Visiting on this Trip?</th>
+            <th rowspan="2" scope="col">Visiting on this Trip?</th>
           </tr>
           <tr>
-            <td></td>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>>3</td>
-            <td></td>
+            <th scope="col">0</th>
+            <th scope="col">1</th>
+            <th scope="col">2</th>
+            <th scope="col">3</th>
+            <th scope="col">&gt;3</th>
           </tr>
+          </thead>
+          <tbody>
           <tr>
             <td>Yamunotri</td>
             <td><input type="radio" name="yamunotri" value="0"></td>
@@ -624,6 +627,7 @@
             <td><input type="radio" name="hemkund" value=">3"></td>
             <td><input type="checkbox" class="current-dham-checkbox" data-dham="Hemkund Sahib" name="dhamCurrentVisit" value="Hemkund Sahib"></td>
           </tr>
+          </tbody>
         </table>
 
         <div id="ongoingDhamStatusSection" class="ongoing-dham-status-section" style="display:none;">
@@ -643,7 +647,7 @@
             <option>Other</option>
           </select>
         </label>
-        
+
         <div id="previousTransportExperience" style="display:none;">
         <h3>A2.1: Your Previous Transport Experience</h3>
         <p class="field-helper">Think about a previous pilgrimage to these shrines or a similar one. Tick all that apply; skip if this is your first pilgrimage.</p>
@@ -714,7 +718,7 @@
     </div>
 
   <div class="form-page" id="page-2B-journey">
-    <p class="fatigue-progress" style="text-align:right;">Page 3 of 9 · ~4 min</p>
+    <p class="fatigue-progress" style="text-align:right;">Page 3 of 10 · ~4 min</p>
         <h2>Section A (continued): Your Journey Details</h2>
 
         <h3>A4: Transportation Mode Choice</h3>
@@ -916,7 +920,7 @@
     </div>
 
   <div class="form-page" id="page-2C-lastmile">
-    <p class="fatigue-progress" style="text-align:right;">Page 4 of 9 · ~3 min</p>
+    <p class="fatigue-progress" style="text-align:right;">Page 4 of 10 · ~3 min</p>
     <h2>Section A (continued): Last-Mile Travel &amp; Stay</h2>
 
         <section class="journey-visual" id="lastMileJourneyPreview" aria-live="polite">
@@ -1032,7 +1036,7 @@
             </div>
             <label id="hemkundTaxiCostLabel" style="display:none;">Cost per person, one-way (₹)
               <input type="number" name="lastMileApproachCost_HemkundSahib" min="0" readonly disabled>
-              <span class="field-helper">Fixed fare: ₹60 per person, one-way.</span>
+
             </label>
             <label id="hemkundWaitingLabel" style="display:none;">Waiting time
               <select name="lastMileApproachWaitingRange_HemkundSahib">
@@ -1151,7 +1155,7 @@
     </div>
 
   <div class="form-page" id="page-3-C">
-    <p class="fatigue-progress" style="text-align:right;">Page 5 of 9 · ~5 min</p>
+    <p class="fatigue-progress" style="text-align:right;">Page 5 of 10 · ~5 min</p>
     <h2 id="mainHaulChoiceTitle">Section B: Main-Haul Choice Experiment</h2>
     <div class="project-brief" id="mainHaulProjectBrief">
         <fieldset class="answer-question">
@@ -1250,12 +1254,12 @@
 
     <div class="section-card" id="mainHaulChoiceCard" style="margin-bottom: 2rem; padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
         <h3 class="text-2xl font-semibold mb-4" style="color: darkblue;">🚌 Section B1: Main-Haul Choice (Rishikesh/Haridwar → Base Camp / Shrine Destination)</h3>
-        
+
         <div class="dham-block" id="main-haul-Kedarnath-block" style="border-left: 5px solid #4e7c5f; background:#eef5f0; display: none;">
             <h4 class="text-xl font-semibold mb-3">📍 Kedarnath: Rishikesh → Sonprayag</h4>
             <div id="main-haul-Kedarnath-tasks"></div>
         </div>
-        
+
         <div class="dham-block" id="main-haul-Badrinath-block" style="border-left: 5px solid #3a6694; background:#eef2f8; display: none;">
             <h4 class="text-xl font-semibold mb-3">📍 Badrinath: Rishikesh → Badrinath</h4>
             <div id="main-haul-Badrinath-tasks"></div>
@@ -1288,7 +1292,7 @@
   </div>
 
   <div class="form-page" id="page-4-C-last-mile">
-    <p class="fatigue-progress" style="text-align:right;">Page 6 of 9 · ~4 min</p>
+    <p class="fatigue-progress" style="text-align:right;">Page 6 of 10 · ~4 min</p>
     <h2 id="lastMileChoiceTitle">Section C: Last-Mile Choice Experiment</h2>
     <div class="project-brief" id="lastMileProjectBrief">
         <fieldset class="answer-question">
@@ -1374,12 +1378,12 @@
             <h4 class="text-xl font-semibold mb-3">📍 Kedarnath: Sonprayag/Gaurikund → Temple (Approx. 16 km)</h4>
             <div id="last-mile-Kedarnath-tasks"></div>
         </div>
-        
+
         <div class="dham-block" id="last-mile-Badrinath-block" style="border-left: 5px solid #3a6694; background:#eef2f8; display: none;">
             <h4 class="text-xl font-semibold mb-3">📍 Badrinath: Badrinath Road-head → Temple (Near Road-head)</h4>
             <div id="last-mile-Badrinath-tasks"></div>
         </div>
-        
+
         <div class="dham-block" id="last-mile-Yamunotri-block" style="border-left: 5px solid #7a5c2e; background:#f7f2eb; display: none;">
             <h4 class="text-xl font-semibold mb-3">📍 Yamunotri: Barkot/Janki Chatti → Temple (Approx. 6 km)</h4>
             <div id="last-mile-Yamunotri-tasks"></div>
@@ -1470,82 +1474,85 @@
     </div>
   </div>
 
-  <div class="form-page" id="page-5-D">
-    <p class="fatigue-progress" style="text-align:right;">Page 7 of 9 · ~3 min</p>
-    <h2>Section D: Travel Priorities &amp; Preferences</h2>
+  <div class="form-page" id="page-5-acceptance">
+    <p class="fatigue-progress" style="text-align:right;">Page 7 of 10 ? ~2 min</p>
+    <h2>Railway &amp; Aerial Ropeway Acceptance</h2>
+    <!-- Gate question for rail block -->
+    <div class="gate-question gate-question--rail">
+      <p class="gate-question-label">🚆 <strong>Rishikesh–Karnaprayag Railway</strong></p>
+      <p class="field-helper">This railway is under construction and expected to open around 2027–28, reaching Karnaprayag. Would you consider using it for a future pilgrimage?</p>
+      <div class="gate-options">
+        <label class="gate-opt"><input type="radio" name="railGate" value="yes" required> Yes, I would use it</label>
+        <label class="gate-opt"><input type="radio" name="railGate" value="maybe"> Maybe, depending on cost and schedule</label>
+        <label class="gate-opt"><input type="radio" name="railGate" value="no"> No, I would not use it</label>
+      </div>
+      <div id="railNoReasonBlock" style="display:none;margin-top:12px;background:#fdf6ec;border-left:3px solid #c97d2a;border-radius:4px;padding:12px 14px;">
+        <p style="margin:0 0 8px 0;font-weight:600;">Why would you not use the railway? <span style="font-weight:400;color:#666;">(Select all that apply)</span></p>
+        <div class="checkbox-option-grid">
+          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="extra_transfers"><span>Need to change vehicles between the train and the shrine</span></label>
+          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="station_access"><span>Getting to the railway station is difficult for me</span></label>
+          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="luggage_difficulty"><span>Carrying luggage during boarding and transfers is difficult</span></label>
+          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="vehicle_continuity"><span>Our group already has a vehicle for the whole journey</span></label>
+          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="other"><span>Other</span></label>
+        </div>
+        <div id="railNoReasonOther" style="display:none;margin-top:8px;">
+          <input type="text" name="railNoReasonOtherText" placeholder="Please specify…" style="width:100%;max-width:420px;padding:6px 8px;border:1px solid #ccc;border-radius:4px;">
+        </div>
+      </div>
+    </div>
 
-    <!-- D0: Transport priorities -->
-    <h3>D0: What Matters to You When Choosing Transport?</h3>
-    <p class="field-helper">Think about this pilgrimage journey specifically. How important is each factor when deciding how to travel to or from the shrine? 1 = not important at all, 5 = very important.</p>
-    <table class="likert-scale">
-      <thead>
-        <tr>
-          <th>Factor</th>
-          <th>1<br><small style="font-weight:normal;">Not<br>Important</small></th>
-          <th>2<br><small style="font-weight:normal;">Slightly<br>Important</small></th>
-          <th>3<br><small style="font-weight:normal;">Moderately<br>Important</small></th>
-          <th>4<br><small style="font-weight:normal;">Important</small></th>
-          <th>5<br><small style="font-weight:normal;">Very<br>Important</small></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Travel Time <span class="field-helper">(reaching the shrine faster)</span></td>
-          <td><input type="radio" name="priorityTime" value="1" required></td><td><input type="radio" name="priorityTime" value="2"></td><td><input type="radio" name="priorityTime" value="3"></td><td><input type="radio" name="priorityTime" value="4"></td><td><input type="radio" name="priorityTime" value="5"></td>
-        </tr>
-        <tr>
-          <td>Transport Cost <span class="field-helper">(fare / ticket price)</span></td>
-          <td><input type="radio" name="priorityCost" value="1" required></td><td><input type="radio" name="priorityCost" value="2"></td><td><input type="radio" name="priorityCost" value="3"></td><td><input type="radio" name="priorityCost" value="4"></td><td><input type="radio" name="priorityCost" value="5"></td>
-        </tr>
-        <tr>
-          <td>Safety <span class="field-helper">(accident risk, vehicle condition, route stability)</span></td>
-          <td><input type="radio" name="prioritySafety" value="1" required></td><td><input type="radio" name="prioritySafety" value="2"></td><td><input type="radio" name="prioritySafety" value="3"></td><td><input type="radio" name="prioritySafety" value="4"></td><td><input type="radio" name="prioritySafety" value="5"></td>
-        </tr>
-        <tr>
-          <td>Comfort <span class="field-helper">(seating, physical ease, cleanliness)</span></td>
-          <td><input type="radio" name="priorityComfort" value="1" required></td><td><input type="radio" name="priorityComfort" value="2"></td><td><input type="radio" name="priorityComfort" value="3"></td><td><input type="radio" name="priorityComfort" value="4"></td><td><input type="radio" name="priorityComfort" value="5"></td>
-        </tr>
-        <tr>
-          <td>Reliability <span class="field-helper">(on time, no cancellations, predictable)</span></td>
-          <td><input type="radio" name="priorityReliability" value="1" required></td><td><input type="radio" name="priorityReliability" value="2"></td><td><input type="radio" name="priorityReliability" value="3"></td><td><input type="radio" name="priorityReliability" value="4"></td><td><input type="radio" name="priorityReliability" value="5"></td>
-        </tr>
-        <tr>
-          <td>Convenience <span class="field-helper">(easy booking, fewer transfers, door-to-door)</span></td>
-          <td><input type="radio" name="priorityConvenience" value="1" required></td><td><input type="radio" name="priorityConvenience" value="2"></td><td><input type="radio" name="priorityConvenience" value="3"></td><td><input type="radio" name="priorityConvenience" value="4"></td><td><input type="radio" name="priorityConvenience" value="5"></td>
-        </tr>
-        <tr>
-          <td>Accessibility for Elderly / Disabled <span class="field-helper">(suitable for all in your group)</span></td>
-          <td><input type="radio" name="priorityAccessibility" value="1" required></td><td><input type="radio" name="priorityAccessibility" value="2"></td><td><input type="radio" name="priorityAccessibility" value="3"></td><td><input type="radio" name="priorityAccessibility" value="4"></td><td><input type="radio" name="priorityAccessibility" value="5"></td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- D3 / D3a / D3b: Rail block (shown only when gate is yes/maybe) -->
+    <div class="mode-block mode-block--rail" id="railModeBlock" style="display:none;">
+      <div class="mode-block-header">🚆 Railway: Detailed Questions</div>
 
-    <hr style="margin:24px 0 16px 0;border:1px solid #d0e8d0;">
-    <!-- D1: Religiosity + Social Norms (merged old D2 + D2a) -->
-    <h3>D1: Pilgrimage Values &amp; Social Norms</h3>
-    <p class="fatigue-progress">Section D · Part 2 of 4 · About 2 minutes remaining</p>
-    <p class="field-helper">Rate how much you agree with each statement. 1 = strongly disagree, 5 = strongly agree.</p>
+    <h3>D2: Rail Connectivity Acceptance</h3>
+    <p class="field-helper">1 = strongly disagree, 5 = strongly agree.</p>
     <table class="likert-scale">
       <thead><tr><th>Statement</th><th>1<br><small style="font-weight:normal;">Strongly<br>Disagree</small></th><th>2<br><small style="font-weight:normal;">Disagree</small></th><th>3<br><small style="font-weight:normal;">Neutral</small></th><th>4<br><small style="font-weight:normal;">Agree</small></th><th>5<br><small style="font-weight:normal;">Strongly<br>Agree</small></th></tr></thead>
       <tbody>
         <tr>
-          <td>Physical effort during the pilgrimage is spiritually important to me.</td>
-          <td><input type="radio" name="relPhysicalEffort" value="1" required></td><td><input type="radio" name="relPhysicalEffort" value="2"></td><td><input type="radio" name="relPhysicalEffort" value="3"></td><td><input type="radio" name="relPhysicalEffort" value="4"></td><td><input type="radio" name="relPhysicalEffort" value="5"></td>
+          <td>Rail travel would significantly reduce my stress on the pilgrimage journey.</td>
+          <td><input type="radio" name="railStress" value="1" required></td><td><input type="radio" name="railStress" value="2"></td><td><input type="radio" name="railStress" value="3"></td><td><input type="radio" name="railStress" value="4"></td><td><input type="radio" name="railStress" value="5"></td>
         </tr>
         <tr>
-          <td>I am undertaking this trip in fulfilment of a religious vow (mannat/sankalp).</td>
-          <td><input type="radio" name="relVow" value="1" required></td><td><input type="radio" name="relVow" value="2"></td><td><input type="radio" name="relVow" value="3"></td><td><input type="radio" name="relVow" value="4"></td><td><input type="radio" name="relVow" value="5"></td>
+          <td>I prefer the flexibility of road travel (depart anytime) over a fixed rail timetable.</td>
+          <td><input type="radio" name="railFlexibility" value="1" required></td><td><input type="radio" name="railFlexibility" value="2"></td><td><input type="radio" name="railFlexibility" value="3"></td><td><input type="radio" name="railFlexibility" value="4"></td><td><input type="radio" name="railFlexibility" value="5"></td>
         </tr>
         <tr>
-          <td>My family or community expects me to trek to the shrine rather than use a vehicle or carrier. <span class="field-helper">(Social expectation around trekking)</span></td>
-          <td><input type="radio" name="normTrekExpected" value="1" required></td><td><input type="radio" name="normTrekExpected" value="2"></td><td><input type="radio" name="normTrekExpected" value="3"></td><td><input type="radio" name="normTrekExpected" value="4"></td><td><input type="radio" name="normTrekExpected" value="5"></td>
-        </tr>
-        <tr>
-          <td>I prefer familiar modes of travel over new or untried options, even if the new one might be faster or cheaper. <span class="field-helper">(Resistance to new modes)</span></td>
-          <td><input type="radio" name="habitFamiliarMode" value="1" required></td><td><input type="radio" name="habitFamiliarMode" value="2"></td><td><input type="radio" name="habitFamiliarMode" value="3"></td><td><input type="radio" name="habitFamiliarMode" value="4"></td><td><input type="radio" name="habitFamiliarMode" value="5"></td>
+          <td>Rail would make the shrines accessible to pilgrims who cannot afford taxis or tour packages.</td>
+          <td><input type="radio" name="railAccessibility" value="1" required></td><td><input type="radio" name="railAccessibility" value="2"></td><td><input type="radio" name="railAccessibility" value="3"></td><td><input type="radio" name="railAccessibility" value="4"></td><td><input type="radio" name="railAccessibility" value="5"></td>
         </tr>
       </tbody>
     </table>
+
+    <!-- D3a: Integrated ticket question (moved from after D2b) -->
+    <h3>D2a: Integrated Ticketing</h3>
+    <label>Would you use a single integrated service (train + feeder bus + ropeway) if available as one connected ticket?
+      <span class="field-helper">Rather than booking each leg separately: one ticket, one booking, seamless connection.</span>
+      <select name="integratedUse">
+        <option value="">--Select--</option>
+        <option>Yes, definitely</option>
+        <option>Yes, if priced reasonably</option>
+        <option>Not sure</option>
+        <option>No, I prefer booking each part myself</option>
+      </select>
+    </label>
+
+    <!-- D3b: Waiting time tolerance (old D6, fits here with rail/transfer context) -->
+    <h3>D2b: Waiting Time Tolerance at Rail Transfer</h3>
+    <p class="field-helper">Imagine you have arrived at Karnaprayag by train and need to board a feeder bus or shared taxi to continue to your shrine. How long would you be willing to wait at the terminus for the next available feeder service before you would prefer to arrange your own transport instead?</p>
+    <label>Maximum wait I would accept for a feeder service:
+      <select name="maxAcceptableWait" required>
+        <option value="">--Select--</option>
+        <option>Less than 15 minutes</option>
+        <option>15–30 minutes</option>
+        <option>30–60 minutes</option>
+        <option>More than 60 minutes</option>
+        <option>I would pre-book the feeder and not wait at all</option>
+      </select>
+    </label>
+
+    </div><!-- end rail block -->
 
     <hr style="margin:24px 0 16px 0;border:1px solid #d0e8d0;">
     <!-- Gate question for ropeway block -->
@@ -1565,8 +1572,6 @@
           <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="safety_concerns"><span>Safety concerns about ropeway technology</span></label>
           <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="prefer_trek"><span>Prefer the physical experience of trekking</span></label>
           <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="cost"><span>Likely too expensive</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="no_need"><span>I have no difficulty walking / physically capable</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="environmental"><span>Environmental concerns about ropeway infrastructure</span></label>
           <label class="checkbox-option"><input type="checkbox" name="ropewayNoReason" value="other"><span>Other</span></label>
         </div>
         <div id="ropewayNoReasonOther" style="display:none;margin-top:8px;">
@@ -1579,7 +1584,7 @@
     <div class="mode-block mode-block--ropeway" id="ropewayModeBlock" style="display:none;">
       <div class="mode-block-header">🚡 Aerial Ropeway: Detailed Questions</div>
 
-    <h3>D2: Ropeway Acceptance</h3>
+    <h3>D3: Ropeway Acceptance</h3>
     <p class="field-helper">1 = strongly disagree, 5 = strongly agree.</p>
     <table class="likert-scale">
       <thead><tr><th>Statement</th><th>1<br><small style="font-weight:normal;">Strongly<br>Disagree</small></th><th>2<br><small style="font-weight:normal;">Disagree</small></th><th>3<br><small style="font-weight:normal;">Neutral</small></th><th>4<br><small style="font-weight:normal;">Agree</small></th><th>5<br><small style="font-weight:normal;">Strongly<br>Agree</small></th></tr></thead>
@@ -1587,10 +1592,6 @@
         <tr>
           <td>I would prefer ropeway over trekking even if it costs more.</td>
           <td><input type="radio" name="ropewayCostPreference" value="1" required></td><td><input type="radio" name="ropewayCostPreference" value="2"></td><td><input type="radio" name="ropewayCostPreference" value="3"></td><td><input type="radio" name="ropewayCostPreference" value="4"></td><td><input type="radio" name="ropewayCostPreference" value="5"></td>
-        </tr>
-        <tr>
-          <td>Using ropeway reduces the spiritual merit of the pilgrimage.</td>
-          <td><input type="radio" name="ropewaySpiritual" value="1" required></td><td><input type="radio" name="ropewaySpiritual" value="2"></td><td><input type="radio" name="ropewaySpiritual" value="3"></td><td><input type="radio" name="ropewaySpiritual" value="4"></td><td><input type="radio" name="ropewaySpiritual" value="5"></td>
         </tr>
         <tr>
           <td>Ropeway is a safer option for elderly and physically limited pilgrims.</td>
@@ -1604,7 +1605,7 @@
     </table>
 
     <!-- D2a: WTP for Ropeway (old D3a) -->
-    <h3>D2a: Willingness to Pay for Ropeway</h3>
+    <h3>D3a: Willingness to Pay for Ropeway</h3>
     <p class="field-helper" id="wtpRopewayQuestion">What is the maximum amount per person you would be willing to pay for ropeway at Kedarnath (one-way)?</p>
     <input type="hidden" name="wtpRopewayShrine" id="wtpRopewayShrine" value="Kedarnath">
     <select name="wtpRopewayKedarnath" required>
@@ -1620,19 +1621,14 @@
     </select>
 
     <!-- D2b: Ropeway drivers (old D3b) -->
-    <h3>D2b: What Would Drive You to Choose Ropeway?</h3>
+    <h3>D3b: What Would Drive You to Choose Ropeway?</h3>
     <p class="field-helper">Select <strong>all factors</strong> that would make you prefer ropeway over trekking or traditional modes at the shrine:</p>
     <div class="checkbox-option-grid">
       <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="time_saving"><span>Saves significant travel time</span></label>
       <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="physical_difficulty"><span>Avoids physical difficulty of trek</span></label>
       <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="safety"><span>Feels safer than trek / mountain path</span></label>
       <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="cost"><span>If cost is affordable or subsidised</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="weather_protection"><span>Protected from weather (rain, cold, snow)</span></label>
       <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="elderly_disabled"><span>Travelling with elderly or persons with disability</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="environment"><span>Lower environmental impact than helicopter</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="modern_experience"><span>Modern and novel travel experience</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="recommended"><span>Recommended by other pilgrims / family</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="ropewayDriver" value="no_alternative"><span>No other comfortable option available</span></label>
     </div>
 
     <div id="helicopterFareQuestion" style="display:none;background:#e7f0f4;border-left:3px solid #527b91;border-radius:4px;padding:12px 14px;margin:16px 0;">
@@ -1651,125 +1647,210 @@
 
     </div><!-- end ropeway block -->
 
-    <hr style="margin:24px 0 16px 0;border:1px solid #d0e8d0;">
-    <!-- Gate question for rail block -->
-    <div class="gate-question gate-question--rail">
-      <p class="gate-question-label">🚆 <strong>Rishikesh–Karnaprayag Railway</strong></p>
-      <p class="field-helper">This railway is under construction and expected to open around 2027–28, reaching Karnaprayag. Would you consider using it for a future pilgrimage?</p>
-      <div class="gate-options">
-        <label class="gate-opt"><input type="radio" name="railGate" value="yes" required> Yes, I would use it</label>
-        <label class="gate-opt"><input type="radio" name="railGate" value="maybe"> Maybe, depending on cost and schedule</label>
-        <label class="gate-opt"><input type="radio" name="railGate" value="no"> No, I would not use it</label>
+    <div class="nav-buttons">
+      <div style="float:left;">
+        <button type="button" onclick="nextPrev(-1)">Previous</button>
       </div>
-      <div id="railNoReasonBlock" style="display:none;margin-top:12px;background:#fdf6ec;border-left:3px solid #c97d2a;border-radius:4px;padding:12px 14px;">
-        <p style="margin:0 0 8px 0;font-weight:600;">Why would you not use the railway? <span style="font-weight:400;color:#666;">(Select all that apply)</span></p>
-        <div class="checkbox-option-grid">
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="spiritual_belief"><span>Spiritual belief (prefer the road pilgrimage journey)</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="limited_connectivity"><span>Railway does not reach my destination shrine</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="prefer_road"><span>Prefer flexibility of road / private vehicle</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="schedule_inflexibility"><span>Fixed train schedules do not suit pilgrimage plans</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="cost"><span>Likely too expensive compared to bus</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="luggage_difficulty"><span>Carrying luggage / equipment on train is inconvenient</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="group_travel"><span>Travelling in a large group (bus is easier)</span></label>
-          <label class="checkbox-option"><input type="checkbox" name="railNoReason" value="other"><span>Other</span></label>
-        </div>
-        <div id="railNoReasonOther" style="display:none;margin-top:8px;">
-          <input type="text" name="railNoReasonOtherText" placeholder="Please specify…" style="width:100%;max-width:420px;padding:6px 8px;border:1px solid #ccc;border-radius:4px;">
-        </div>
+      <div style="float:right;">
+        <button type="button" onclick="nextPrev(1)">Next</button>
       </div>
     </div>
+  </div>
 
-    <!-- D3 / D3a / D3b: Rail block (shown only when gate is yes/maybe) -->
-    <div class="mode-block mode-block--rail" id="railModeBlock" style="display:none;">
-      <div class="mode-block-header">🚆 Railway: Detailed Questions</div>
+  <div class="form-page" id="page-5-D">
+    <p class="fatigue-progress" style="text-align:right;">Page 8 of 10 · ~3 min</p>
+    <h2>Section D: Travel Priorities &amp; Preferences</h2>
 
-    <h3>D3: Rail Connectivity Acceptance</h3>
-    <p class="fatigue-progress">Section D · Part 4 of 4 · Almost done!</p>
-    <p class="field-helper">1 = strongly disagree, 5 = strongly agree.</p>
-    <table class="likert-scale">
-      <thead><tr><th>Statement</th><th>1<br><small style="font-weight:normal;">Strongly<br>Disagree</small></th><th>2<br><small style="font-weight:normal;">Disagree</small></th><th>3<br><small style="font-weight:normal;">Neutral</small></th><th>4<br><small style="font-weight:normal;">Agree</small></th><th>5<br><small style="font-weight:normal;">Strongly<br>Agree</small></th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Rail travel would significantly reduce my stress on the pilgrimage journey.</td>
-          <td><input type="radio" name="railStress" value="1" required></td><td><input type="radio" name="railStress" value="2"></td><td><input type="radio" name="railStress" value="3"></td><td><input type="radio" name="railStress" value="4"></td><td><input type="radio" name="railStress" value="5"></td>
-        </tr>
-        <tr>
-          <td>I am concerned that total rail + last-mile cost will be higher than road travel.</td>
-          <td><input type="radio" name="railCostConcern" value="1" required></td><td><input type="radio" name="railCostConcern" value="2"></td><td><input type="radio" name="railCostConcern" value="3"></td><td><input type="radio" name="railCostConcern" value="4"></td><td><input type="radio" name="railCostConcern" value="5"></td>
-        </tr>
-        <tr>
-          <td>I prefer the flexibility of road travel (depart anytime) over a fixed rail timetable.</td>
-          <td><input type="radio" name="railFlexibility" value="1" required></td><td><input type="radio" name="railFlexibility" value="2"></td><td><input type="radio" name="railFlexibility" value="3"></td><td><input type="radio" name="railFlexibility" value="4"></td><td><input type="radio" name="railFlexibility" value="5"></td>
-        </tr>
-        <tr>
-          <td>Rail would make the shrines accessible to pilgrims who cannot afford taxis or tour packages.</td>
-          <td><input type="radio" name="railAccessibility" value="1" required></td><td><input type="radio" name="railAccessibility" value="2"></td><td><input type="radio" name="railAccessibility" value="3"></td><td><input type="radio" name="railAccessibility" value="4"></td><td><input type="radio" name="railAccessibility" value="5"></td>
-        </tr>
-        <tr>
-          <td>Rail would reduce vehicle congestion and pollution in the mountain zones.</td>
-          <td><input type="radio" name="railCongestion" value="1" required></td><td><input type="radio" name="railCongestion" value="2"></td><td><input type="radio" name="railCongestion" value="3"></td><td><input type="radio" name="railCongestion" value="4"></td><td><input type="radio" name="railCongestion" value="5"></td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- D0: Transport priorities -->
+    <h3>D0: What Matters to You When Choosing Transport?</h3>
+    <p class="field-helper">Think about this pilgrimage journey specifically. How important is each factor when deciding how to travel to or from the shrine? 1 = not important at all, 5 = very important.</p>
+    <div class="priority-ratings" id="transportPrioritiesRatings">
+      <fieldset class="priority-rating">
+        <legend>Total Travel Time</legend>
+        <p class="field-helper" id="priority-description-0">How important is reaching the shrine quickly, including waiting and transfer time?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityTime" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-0"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityTime" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-0"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityTime" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-0"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityTime" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-0"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityTime" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-0"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Total Transport Cost</legend>
+        <p class="field-helper" id="priority-description-1">How important is keeping your total transport cost low?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityCost" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-1"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityCost" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-1"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityCost" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-1"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityCost" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-1"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityCost" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-1"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Safety During the Journey</legend>
+        <p class="field-helper" id="priority-description-2">How important is travelling safely, considering the vehicle and route?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="prioritySafety" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-2"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="prioritySafety" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-2"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="prioritySafety" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-2"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="prioritySafety" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-2"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="prioritySafety" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-2"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Travel Comfort</legend>
+        <p class="field-helper" id="priority-description-3">How important is a comfortable journey with clean seating and less physical strain?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityComfort" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-3"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityComfort" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-3"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityComfort" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-3"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityComfort" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-3"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityComfort" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-3"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Reliability of the Service</legend>
+        <p class="field-helper" id="priority-description-4">How important is a service that runs on time with few delays or cancellations?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityReliability" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-4"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityReliability" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-4"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityReliability" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-4"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityReliability" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-4"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityReliability" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-4"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Ease of Booking and Transfers</legend>
+        <p class="field-helper" id="priority-description-5">How important are easy booking, fewer vehicle changes, and convenient pickup and drop-off?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityConvenience" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-5"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityConvenience" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-5"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityConvenience" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-5"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityConvenience" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-5"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityConvenience" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-5"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Accessibility for Elderly Pilgrims and People with Disabilities</legend>
+        <p class="field-helper" id="priority-description-6">How important is easy boarding and travel for elderly pilgrims or people with disabilities in your group?</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="priorityAccessibility" value="1" required aria-label="1 ? Not important at all" aria-describedby="priority-description-6"><span>1</span><small class="priority-rating-caption">Not important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityAccessibility" value="2" required aria-label="2 ? Slightly important" aria-describedby="priority-description-6"><span>2</span><small class="priority-rating-caption">Slightly important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityAccessibility" value="3" required aria-label="3 ? Moderately important" aria-describedby="priority-description-6"><span>3</span><small class="priority-rating-caption">Moderately important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityAccessibility" value="4" required aria-label="4 ? Important" aria-describedby="priority-description-6"><span>4</span><small class="priority-rating-caption">Important</small></label>
+          <label class="answer-choice"><input type="radio" name="priorityAccessibility" value="5" required aria-label="5 ? Very important" aria-describedby="priority-description-6"><span>5</span><small class="priority-rating-caption">Very important</small></label>
+        </div>
+      </fieldset>
+    </div>
 
-    <!-- D3a: Integrated ticket question (moved from after D2b) -->
-    <h3>D3a: Integrated Ticketing</h3>
-    <label>Would you use a single integrated service (train + feeder bus + ropeway) if available as one connected ticket?
-      <span class="field-helper">Rather than booking each leg separately: one ticket, one booking, seamless connection.</span>
-      <select name="integratedUse">
-        <option value="">--Select--</option>
-        <option>Yes, definitely</option>
-        <option>Yes, if priced reasonably</option>
-        <option>Not sure</option>
-        <option>No, I prefer booking each part myself</option>
-      </select>
-    </label>
+    <hr style="margin:24px 0 16px 0;border:1px solid #d0e8d0;">
+    <!-- D1: Religiosity + Social Norms (merged old D2 + D2a) -->
+    <h3>D1: Pilgrimage Values &amp; Social Norms</h3>
+    <p class="field-helper">Rate how much you agree with each statement. 1 = strongly disagree, 5 = strongly agree.</p>
+    <div class="priority-ratings" id="pilgrimageValuesRatings">
+      <fieldset class="priority-rating">
+        <legend>Physical effort during the pilgrimage is spiritually important to me.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="relPhysicalEffort" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="relPhysicalEffort" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="relPhysicalEffort" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="relPhysicalEffort" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="relPhysicalEffort" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>I am undertaking this trip in fulfilment of a religious vow (mannat/sankalp).</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="relVow" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="relVow" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="relVow" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="relVow" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="relVow" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>My family or community expects me to trek to the shrine rather than use a vehicle or carrier.</legend>
+        <p class="field-helper" id="values-description-2">(Social expectation around trekking)</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="normTrekExpected" value="1" required aria-label="1 ? Strongly disagree" aria-describedby="values-description-2"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="normTrekExpected" value="2" required aria-label="2 ? Disagree" aria-describedby="values-description-2"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="normTrekExpected" value="3" required aria-label="3 ? Neutral" aria-describedby="values-description-2"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="normTrekExpected" value="4" required aria-label="4 ? Agree" aria-describedby="values-description-2"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="normTrekExpected" value="5" required aria-label="5 ? Strongly agree" aria-describedby="values-description-2"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>I prefer familiar modes of travel over new or untried options, even if the new one might be faster or cheaper.</legend>
+        <p class="field-helper" id="values-description-3">(Resistance to new modes)</p>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="habitFamiliarMode" value="1" required aria-label="1 ? Strongly disagree" aria-describedby="values-description-3"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="habitFamiliarMode" value="2" required aria-label="2 ? Disagree" aria-describedby="values-description-3"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="habitFamiliarMode" value="3" required aria-label="3 ? Neutral" aria-describedby="values-description-3"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="habitFamiliarMode" value="4" required aria-label="4 ? Agree" aria-describedby="values-description-3"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="habitFamiliarMode" value="5" required aria-label="5 ? Strongly agree" aria-describedby="values-description-3"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+    </div>
 
-    <!-- D3b: Waiting time tolerance (old D6, fits here with rail/transfer context) -->
-    <h3>D3b: Waiting Time Tolerance at Rail Transfer</h3>
-    <p class="field-helper">Imagine you have arrived at Karnaprayag by train and need to board a feeder bus or shared taxi to continue to your shrine. How long would you be willing to wait at the terminus for the next available feeder service before you would prefer to arrange your own transport instead?</p>
-    <label>Maximum wait I would accept for a feeder service:
-      <select name="maxAcceptableWait" required>
-        <option value="">--Select--</option>
-        <option>Less than 15 minutes</option>
-        <option>15–30 minutes</option>
-        <option>30–60 minutes</option>
-        <option>More than 60 minutes</option>
-        <option>I would pre-book the feeder and not wait at all</option>
-      </select>
-    </label>
 
-    </div><!-- end rail block -->
 
     <hr style="margin:24px 0 16px 0;border:1px solid #d0e8d0;">
     <!-- D4: Environmental Attitudes (merged old D1 + D5 into one table) -->
     <h3>D4: Environmental Attitudes</h3>
     <p class="field-helper">Rate how much you agree with each statement. 1 = strongly disagree, 5 = strongly agree.</p>
-    <table class="likert-scale">
-      <thead><tr><th>Statement</th><th>1<br><small style="font-weight:normal;">Strongly<br>Disagree</small></th><th>2<br><small style="font-weight:normal;">Disagree</small></th><th>3<br><small style="font-weight:normal;">Neutral</small></th><th>4<br><small style="font-weight:normal;">Agree</small></th><th>5<br><small style="font-weight:normal;">Strongly<br>Agree</small></th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Too many vehicles on mountain roads cause environmental damage near the shrines.</td>
-          <td><input type="radio" name="attitudeRoadEnvironment" value="1" required></td><td><input type="radio" name="attitudeRoadEnvironment" value="2"></td><td><input type="radio" name="attitudeRoadEnvironment" value="3"></td><td><input type="radio" name="attitudeRoadEnvironment" value="4"></td><td><input type="radio" name="attitudeRoadEnvironment" value="5"></td>
-        </tr>
-        <tr>
-          <td>Preserving the natural character of the pilgrimage route matters more than making it more convenient.</td>
-          <td><input type="radio" name="attitudeNatureConvenience" value="1" required></td><td><input type="radio" name="attitudeNatureConvenience" value="2"></td><td><input type="radio" name="attitudeNatureConvenience" value="3"></td><td><input type="radio" name="attitudeNatureConvenience" value="4"></td><td><input type="radio" name="attitudeNatureConvenience" value="5"></td>
-        </tr>
-        <tr>
-          <td>I would choose a lower-emission transport option even if it costs slightly more.</td>
-          <td><input type="radio" name="envLowEmission" value="1" required></td><td><input type="radio" name="envLowEmission" value="2"></td><td><input type="radio" name="envLowEmission" value="3"></td><td><input type="radio" name="envLowEmission" value="4"></td><td><input type="radio" name="envLowEmission" value="5"></td>
-        </tr>
-        <tr>
-          <td>The government should restrict private vehicles near shrines to protect the environment.</td>
-          <td><input type="radio" name="envRestrict" value="1" required></td><td><input type="radio" name="envRestrict" value="2"></td><td><input type="radio" name="envRestrict" value="3"></td><td><input type="radio" name="envRestrict" value="4"></td><td><input type="radio" name="envRestrict" value="5"></td>
-        </tr>
-        <tr>
-          <td>I am willing to pay a small environmental cess (₹50–100) on my transport fare for conservation.</td>
-          <td><input type="radio" name="envCess" value="1" required></td><td><input type="radio" name="envCess" value="2"></td><td><input type="radio" name="envCess" value="3"></td><td><input type="radio" name="envCess" value="4"></td><td><input type="radio" name="envCess" value="5"></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="priority-ratings" id="environmentalAttitudesRatings">
+      <fieldset class="priority-rating">
+        <legend>Too many vehicles on mountain roads cause environmental damage near the shrines.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="attitudeRoadEnvironment" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeRoadEnvironment" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeRoadEnvironment" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeRoadEnvironment" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeRoadEnvironment" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>Preserving the natural character of the pilgrimage route matters more than making it more convenient.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="attitudeNatureConvenience" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeNatureConvenience" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeNatureConvenience" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeNatureConvenience" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="attitudeNatureConvenience" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>I would choose a lower-emission transport option even if it costs slightly more.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="envLowEmission" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envLowEmission" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envLowEmission" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="envLowEmission" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="envLowEmission" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>The government should restrict private vehicles near shrines to protect the environment.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="envRestrict" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envRestrict" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envRestrict" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="envRestrict" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="envRestrict" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+      <fieldset class="priority-rating">
+        <legend>I am willing to pay a small environmental cess (₹50–100) on my transport fare for conservation.</legend>
+        <div class="priority-rating-options">
+          <label class="answer-choice"><input type="radio" name="envCess" value="1" required aria-label="1 ? Strongly disagree"><span>1</span><small class="priority-rating-caption">Strongly disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envCess" value="2" required aria-label="2 ? Disagree"><span>2</span><small class="priority-rating-caption">Disagree</small></label>
+          <label class="answer-choice"><input type="radio" name="envCess" value="3" required aria-label="3 ? Neutral"><span>3</span><small class="priority-rating-caption">Neutral</small></label>
+          <label class="answer-choice"><input type="radio" name="envCess" value="4" required aria-label="4 ? Agree"><span>4</span><small class="priority-rating-caption">Agree</small></label>
+          <label class="answer-choice"><input type="radio" name="envCess" value="5" required aria-label="5 ? Strongly agree"><span>5</span><small class="priority-rating-caption">Strongly agree</small></label>
+        </div>
+      </fieldset>
+    </div>
 
     <div class="nav-buttons">
       <div style="float:left;">
@@ -1782,7 +1863,7 @@
   </div>
 
   <div class="form-page" id="page-6-F">
-    <p class="fatigue-progress" style="text-align:right;">Page 9 of 9 · ~1 min</p>
+    <p class="fatigue-progress" style="text-align:right;">Page 10 of 10 · ~1 min</p>
     <h2>Section F: Feedback & Suggestions</h2>
 
     <label>Overall trip rating:
@@ -1823,18 +1904,13 @@
     </label>
     <div class="checkbox-option-grid">
       <label class="checkbox-option"><input type="checkbox" name="challenge" value="Long Waiting Time"><span>Long waiting time at terminals or checkpoints</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="High Transport Cost"><span>High transport cost (bus, taxi, helicopter)</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Safety Concerns"><span>Safety concerns on mountain roads or trek paths</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Road Conditions"><span>Poor road conditions (narrow, damaged, landslide-prone)</span></label>
       <label class="checkbox-option"><input type="checkbox" name="challenge" value="Landslides Blockage"><span>Landslides or road blockages causing delays</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Weather Dependency"><span>Weather dependency (rain, fog, snowfall causing cancellations)</span></label>
+      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Weather Dependency"><span>Transport delays or cancellations due to rain, fog, or snow</span></label>
       <label class="checkbox-option"><input type="checkbox" name="challenge" value="Overcrowding"><span>Overcrowding on vehicles or at shrine approach points</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Helicopter Unavailability"><span>Helicopter slots unavailable or overpriced (Kedarnath)</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="Lack of Information"><span>Lack of information / poor signage at terminals</span></label>
-      <label class="checkbox-option"><input type="checkbox" name="challenge" value="No Accessibility"><span>No accessible option for elderly or disabled group members</span></label>
+      <label class="checkbox-option"><input type="checkbox" name="challenge" value="No Accessibility"><span>Difficulty finding suitable transport for elderly pilgrims or people with disabilities</span></label>
       <label class="checkbox-option checkbox-option--none"><input type="checkbox" name="challenge" value="Other"><span>Other</span></label>
     </div>
-    
+
     <label>Main challenges and suggestions:
       <span class="field-helper">Describe the biggest problem you faced and any ideas to improve transport, facilities, or information for future pilgrims.</span>
       <textarea name="feedbackChallenge" rows="4" placeholder="e.g., Long queues at Gaurikund, overcrowded shared jeeps, poor signage at Sonprayag..."></textarea>

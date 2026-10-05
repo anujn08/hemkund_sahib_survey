@@ -1,4 +1,87 @@
 /* Base */
+.drb-icon:empty {
+    display: none;
+}
+
+/* A2: fill the available width without empty header cells. */
+table#visitHistoryTable {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+#visitHistoryTable thead,
+#visitHistoryTable tbody {
+    min-width: 0;
+}
+#visitHistoryTable .visit-shrine-column {
+    width: 26%;
+}
+#visitHistoryTable .visit-current-column {
+    width: 24%;
+}
+#visitHistoryTable th,
+#visitHistoryTable td {
+    padding: 8px 4px;
+    overflow-wrap: anywhere;
+}
+#visitHistoryTable input {
+    margin: 0;
+    vertical-align: middle;
+}
+
+/* D0: compact, single-tap importance ratings. */
+.priority-ratings {
+    display: grid;
+    gap: 10px;
+    margin: 16px 0 24px;
+}
+.priority-rating {
+    min-width: 0;
+    margin: 0;
+    padding: 10px 14px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+}
+.priority-rating legend {
+    padding: 0 4px;
+    font-weight: 700;
+    color: var(--brand-dark);
+}
+.priority-rating .field-helper {
+    margin: 0 0 8px;
+}
+.priority-rating-options {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    max-width: 520px;
+}
+.priority-rating-options .answer-choice {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+.priority-rating-options .answer-choice > span {
+    box-sizing: border-box;
+    justify-content: center;
+    min-height: 44px;
+    padding: 6px 4px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+.priority-rating-options .priority-rating-caption {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
 #dhamSequenceSelection h4 {
     margin-bottom: 4px;
 }
@@ -353,24 +436,38 @@
     font-weight: 700;
     margin-bottom: 8px;
 }
+/* Use the standard compact answer buttons for every Leg 2 question. */
 #hemkundMountainDetails .answer-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin-top: 0;
-}
-#hemkundMountainDetails .hemkund-choice-group:first-child .answer-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 0;
 }
-#hemkundMountainDetails .answer-choice span {
-    justify-content: center;
-    text-align: center;
-    height: 100%;
-    min-height: 48px;
-    padding: 10px 12px;
-    border-radius: 10px;
+#hemkundMountainDetails .answer-choice {
+    min-width: 0;
+    max-width: 100%;
+}
+#hemkundMountainDetails .answer-choice > span {
+    box-sizing: border-box;
+    min-height: 34px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+#hemkundMountainDetails .answer-choice > span > span {
+    min-height: 0;
+    background: transparent;
+    font: inherit;
+}
+/* prevent nested spans (e.g. translate="no") from adding colour, border or spacing */
+.answer-choice span span {
+    color: inherit;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: inline;
 }
 #hemkundMountainDetails .answer-choice input:checked + span {
     box-shadow: 0 2px 6px #244c3633;

@@ -995,7 +995,7 @@ const DHAM_ROUTE_INFO = {
         profile: [[0,100],[100,0]]
     },
     'Gangotri': {
-        icon: '🌊', color: '#4a5a7a', state: 'Uttarakhand',
+        icon: '', color: '#4a5a7a', state: 'Uttarakhand',
         altitude: '3,100', district: 'Uttarkashi',
         trekLabel: 'Road access', trekRoute: 'Harsil → Gangotri Temple',
         profile: [[0,100],[50,55],[100,18]]
@@ -2152,7 +2152,7 @@ function createRestLocationRowHTML(index, dham = '') {
     const rowId = isAutoDhamRow ? `rest-row-${dhamSlug}` : `rest-row-extra-${index}`;
     const purposeOptions = `<option value="">--Select--</option><option>Food/Refreshment</option><option>Rest/Toilet Break</option><option>Night Halt/Accommodation</option><option>Sightseeing</option><option>Medical/First Aid</option><option>Parking/Vehicle Change</option><option>Other</option>`;
     const locationOptions = buildStopoverLocationOptions(dham);
-    const accomOptions = `<option value="N/A">N/A (Short Stop)</option><option>Roadside Food/Tea Stall</option><option>Restaurant/Dhaba</option><option>Public Rest/Toilet Facility</option><option>Hotel</option><option>Dharamshala</option><option>Guest House</option><option>Ashram</option><option>Parking/Transport Hub</option><option>Other</option>`;
+    const accomOptions = `<option value="N/A">N/A (Short Stop)</option><option>Roadside Food/Tea Stall</option><option>Restaurant/Dhaba</option><option>Public Rest/Toilet Facility</option><option>Hotel</option><option>Dharamsala/Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Parking/Transport Hub</option><option>Other</option>`;
     const requiredAttr = isAutoDhamRow ? '' : ' required';
     const routeCell = isAutoDhamRow
         ? `Route to ${escapeHTML(dham)}<input type="hidden" name="restRoute_${index}" value="Route to ${escapeAttribute(dham)}">`
@@ -2462,7 +2462,7 @@ function updateAccommodationCosts(migrateExact = false) {
 function createStayDurationRowHTML(dham) {
     const stayLocation = dham === 'Hemkund Sahib' ? 'Ghangaria' : dham;
     const dhamSlug = dham.replace(/\s/g, '');
-    const accomOptions = `<option value="">--Select--</option><option>Hotel</option><option>Dharamshala</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
+    const accomOptions = `<option value="">--Select--</option><option>Hotel</option><option>Dharamsala/Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
     return `
         <tr id="stay-duration-row-${dhamSlug}">
             <td>${stayLocation}${dham === 'Hemkund Sahib' ? '<small class="field-helper">Hemkund Sahib overnight base</small>' : ''}<input type="hidden" name="stayLocation_${dhamSlug}" value="${escapeAttribute(stayLocation)}"></td>
@@ -4419,6 +4419,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         'page-2C-lastmile',  // Section A Part 3: last-mile journey and stay
         'page-3-C',          // Section B: Main-Haul DCE
         'page-4-C-last-mile',// Section C: Last-Mile DCE
+        'page-5-acceptance', // Railway and ropeway acceptance
         'page-5-D',          // Section D: Priorities & Attitudes
         'page-1-E',          // Section E: Demographics
         'page-6-F',          // Section F: Feedback
