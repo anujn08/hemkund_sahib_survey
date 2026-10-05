@@ -198,9 +198,9 @@ function writeRespondent(params, responseId, submittedAt) {
     'transportInfoSource','transportBookingMethod','transportDecisionMaker','yatraRegistration','transportBudget','trekFitness','healthLimitation',
     'startPoint','otherStartPoint','totalDurationDays','onwardVehicleContinuity','returnJourneyType','returnVehicleContinuity',
     'priorModeExp','railwayAwareness','hillTrainExperience','railwaySentiment','ropewayAwareness',
-    'priorityTime','priorityCost','prioritySafety','priorityComfort','priorityReliability','priorityEnvironment','priorityCulture','priorityConvenience','priorityAccessibility',
-    'attitudeRoadEnvironment','attitudeNatureConvenience','relPhysicalEffort','relVow','relTraditionalMode','relModernAcceptable','normTrekExpected','normPeerTrek',
-    'habitSameMode','habitFamiliarMode','ropewayCostPreference','ropewaySpiritual','ropewaySafety','ropewayRecommend','ropewaySubsidy','attitudeRopewayCongestion',
+    'priorityTime','priorityCost','prioritySafety','priorityComfort','priorityReliability','priorityConvenience','priorityAccessibility',
+    'attitudeRoadEnvironment','attitudeNatureConvenience','relPhysicalEffort','relVow','normTrekExpected',
+    'habitFamiliarMode','ropewayCostPreference','ropewaySpiritual','ropewaySafety','ropewaySubsidy',
     'wtpRopewayKedarnath','ropewayDriver','helicopterReducedCostIntent','integratedUse','integratedPayment','guaranteedSeatWtp','integratedNoReason',
     'integratedTime','integratedCost','integratedComfort','integratedReliability','integratedSafety','railStress','railCostConcern','railFlexibility',
     'railAccessibility','railCongestion','envLowEmission','envRestrict','envCess','maxAcceptableWait','overallSatisfaction','intentToReturn',
@@ -339,16 +339,23 @@ function writeStopovers(params, responseId) {
 function writeLastMileTrips(params, responseId) {
   var headers=['responseId','dham','kedarnathAccessType','approachMode','approachTime','approachCost','approachWaitingTime',
     'helicopterBoardingPoint','helicopterTime','helicopterCost','helicopterWaitingTime','route','mode','timeHours','cost',
-    'returnType','returnMode','returnTimeHours','returnCost','stayDuration','stayAccommodation','stayAccommodationCost'];
+    'returnType','returnRoute','returnHelipad','returnLeg1Route','returnMode','returnTimeBand','returnTimeHours','returnCostBand','returnCost','returnLeg2Route','returnLeg2Mode','returnLeg2TimeBand','returnLeg2TimeHours','returnLeg2CostBand','returnLeg2Cost','returnLeg3Route','returnLeg3Mode','returnLeg3TimeBand','returnLeg3TimeHours','returnLeg3CostBand','returnLeg3Cost','stayDuration','stayAccommodation','stayAccommodationCost',
+    'mountainDestination','mountainMode','mountainTimeBand','mountainTimeHours','mountainCostBand','mountainCost','ghangariaStop','stayLocation'];
   var rows=selectedDhams(params).map(function(dham){var slug=dhamSlug(dham);return {responseId:responseId,dham:dham,
     kedarnathAccessType:dham==='Kedarnath'?first(params,'kedarnathAccessType'):'',approachMode:first(params,'lastMileApproachMode_'+slug),
     approachTime:first(params,'lastMileApproachTime_'+slug),approachCost:first(params,'lastMileApproachCost_'+slug),approachWaitingTime:first(params,'lastMileApproachWaitingTime_'+slug),
     helicopterBoardingPoint:dham==='Kedarnath'?first(params,'kedarnathHelicopterBoardingPoint'):'',helicopterTime:dham==='Kedarnath'?first(params,'kedarnathHelicopterTime'):'',
     helicopterCost:dham==='Kedarnath'?first(params,'kedarnathHelicopterCost'):'',helicopterWaitingTime:dham==='Kedarnath'?first(params,'kedarnathHelicopterWaitingTime'):'',
     route:first(params,'lastMileRoute_'+slug),mode:first(params,'lastMileMode_'+slug),timeHours:first(params,'lastMileTime_'+slug),cost:first(params,'lastMileCost_'+slug),
-    returnType:first(params,'lastMileReturnType_'+slug),returnMode:first(params,'lastMileReturnMode_'+slug),returnTimeHours:first(params,'lastMileReturnTime_'+slug),
+    returnType:first(params,'lastMileReturnType_'+slug),returnRoute:first(params,'lastMileReturnRoute_'+slug),returnHelipad:first(params,'lastMileReturnHelipad_'+slug),returnLeg1Route:first(params,'lastMileReturnLegRoute_'+slug),returnTimeBand:first(params,'lastMileReturnTimeBand_'+slug),returnCostBand:first(params,'lastMileReturnCostBand_'+slug),
+    returnLeg2Route:first(params,'lastMileReturnLegRoute_'+slug+'_Leg2'),returnLeg2Mode:first(params,'lastMileReturnMode_'+slug+'_Leg2'),returnLeg2TimeBand:first(params,'lastMileReturnTimeBand_'+slug+'_Leg2'),returnLeg2TimeHours:first(params,'lastMileReturnTime_'+slug+'_Leg2'),returnLeg2CostBand:first(params,'lastMileReturnCostBand_'+slug+'_Leg2'),returnLeg2Cost:first(params,'lastMileReturnCost_'+slug+'_Leg2'),
+    returnLeg3Route:first(params,'lastMileReturnLegRoute_'+slug+'_Leg3'),returnLeg3Mode:first(params,'lastMileReturnMode_'+slug+'_Leg3'),returnLeg3TimeBand:first(params,'lastMileReturnTimeBand_'+slug+'_Leg3'),returnLeg3TimeHours:first(params,'lastMileReturnTime_'+slug+'_Leg3'),returnLeg3CostBand:first(params,'lastMileReturnCostBand_'+slug+'_Leg3'),returnLeg3Cost:first(params,'lastMileReturnCost_'+slug+'_Leg3'),
+    returnMode:first(params,'lastMileReturnMode_'+slug),returnTimeHours:first(params,'lastMileReturnTime_'+slug),
     returnCost:first(params,'lastMileReturnCost_'+slug),stayDuration:first(params,'stayDuration_'+slug),stayAccommodation:first(params,'stayAccom_'+slug),
-    stayAccommodationCost:first(params,'stayAccomCost_'+slug)};});
+    stayAccommodationCost:first(params,'stayAccomCost_'+slug),
+    mountainDestination:first(params,'lastMileApproachDestination_'+slug),mountainMode:first(params,'lastMileApproachMountainMode_'+slug),
+    mountainTimeBand:first(params,'lastMileApproachMountainTimeBand_'+slug),mountainTimeHours:first(params,'lastMileApproachMountainTime_'+slug),mountainCostBand:first(params,'lastMileApproachMountainCostBand_'+slug),mountainCost:first(params,'lastMileApproachMountainCost_'+slug),
+    ghangariaStop:first(params,'lastMileApproachStop_'+slug),stayLocation:first(params,'stayLocation_'+slug)};});
   appendRows('LastMileTrips',rows,headers);
 }
 

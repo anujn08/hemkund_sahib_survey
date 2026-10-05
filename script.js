@@ -1,4 +1,4 @@
-﻿// Drafts contain data only; dynamic controls are rebuilt using the survey's handlers.
+// Drafts contain data only; dynamic controls are rebuilt using the survey's handlers.
 const SURVEY_DRAFT_KEY = 'charDhamSurveyDraftV1';
 let draftReady = false;
 let restoringDraft = false;
@@ -96,7 +96,7 @@ function restoreSurveyDraft(draft) {
                 }
             });
         };
-        // Dependencies span Dham selection, sequence, transfers, modes and other fields.
+        // Dependencies span shrine selection, sequence, transfers, modes and other fields.
         for (let pass = 0; pass < 6; pass++) applyFields(true);
         restoreExtraRows();
         for (let pass = 0; pass < 3; pass++) applyFields(true);
@@ -111,8 +111,8 @@ function restoreSurveyDraft(draft) {
         const hemkundWaitingExact = form.querySelector('[name="lastMileApproachWaitingTime_HemkundSahib"]');
         if (hemkundWaitingRange && !hemkundWaitingRange.value && hemkundWaitingExact?.value !== '') hemkundWaitingRange.value = 'exact';
         updateHemkundTaxiDetails();
-        lastMileTableBody.querySelectorAll('tr').forEach(row => updateLastMileTimeChoice(row, true));
-        lastMileTableBody.querySelectorAll('tr').forEach(row => updateLastMileCostChoice(row, true));
+        getLastMileRows().forEach(row => updateLastMileTimeChoice(row, true));
+        getLastMileRows().forEach(row => updateLastMileCostChoice(row, true));
         document.querySelectorAll('.last-mile-return-card').forEach(card => {
             const slug = card.id.replace('last-mile-return-', '');
             updateLastMileReturnDetails(slug, true);
@@ -200,13 +200,13 @@ Hemkund Sahib,2,1000,2,High,Medium,0,2500,1,Luxury,Very High,0,0,5,Low,Low,0,Pal
 let currentTab = 0;
 let responses = [];
 let primaryModeRowIndex = 0;
-let lastMileRowIndex = 0; // Note: This index isn't used, rows are managed by Dham name
+let lastMileRowIndex = 0; // Note: This index isn't used, rows are managed by shrine name
 let restLocationRowIndex = 0;
 let choiceBlock = null;
 let selectedChoiceTaskNumbersBySet = {};
 
-// Change this number when you want each respondent to see more/fewer cards per visited Dham.
-// Example: 4 means each respondent sees 4 cards per visited Dham.
+// Change this number when you want each respondent to see more/fewer cards per visited shrine.
+// Example: 4 means each respondent sees 4 cards per visited shrine.
 const CHOICE_CARDS_PER_BLOCK = 4;
 
 // "random" gives each respondent a random combination of cards.
@@ -403,6 +403,19 @@ function validatePage(n) {
         }
     });
 
+    // Optional lucky-draw contact: if filled, must be a 10-digit Indian mobile or a UPI ID.
+    const upiInput = page.querySelector('#luckyDrawUpi');
+    if (upiInput) {
+        upiInput.style.border = '1px solid #ccc';
+        const upi = upiInput.value.replace(/[\s-]+/g, '').replace(/^(\+91|91)(?=\d{10}$)/, '');
+        if (upi && !/^([6-9]\d{9}|[\w.-]{2,}@[A-Za-z]{2,})$/.test(upi)) {
+            upiInput.style.border = '2px solid red';
+            upiInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            alert('Please enter a valid 10-digit GPay number or UPI ID, or leave the lucky-draw box empty.');
+            return false;
+        }
+    }
+
     if (!valid && firstInvalidEl) {
         firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -492,7 +505,7 @@ function updateOngoingDhamStatus() {
     container.innerHTML = selectedDhams.map(dham => {
         const name = `ongoingDhamStatus_${getDhamSlug(dham)}`;
         return `<fieldset class="ongoing-dham-status-card"><legend>${escapeHTML(dham)}</legend>${getCompactChoiceButtonsHTML(name, [
-            ['Completed', 'Completed'], ['Currently underway', 'Currently travelling / at Dham'], ['Planned next', 'Planned next'], ['Planned later', 'Planned later']
+            ['Completed', 'Completed'], ['Currently underway', 'Currently travelling / at the shrine'], ['Planned next', 'Planned next'], ['Planned later', 'Planned later']
         ], previous[name] || '')}</fieldset>`;
     }).join('');
 }
@@ -739,7 +752,29 @@ function initializeDCE() {
     const hasLastMileChoiceTasks = visitedDhams.some(dham => Array.isArray(lastMileTasks[dham]) && lastMileTasks[dham].length > 0);
     toggleChoiceArea('mainHaul', hasMainHaulChoiceTasks);
     toggleChoiceArea('lastMile', hasLastMileChoiceTasks);
-    
+
+    // Hemkund-only respondents get a short Hemkund brief instead of the all-shrine introduction.
+    const hemkundOnly = visitedDhams.length === 1 && visitedDhams[0] === 'Hemkund Sahib';
+    ['mainHaulGeneralBrief', 'lastMileGeneralContext', 'lastMileGeneralBrief'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.style.display = hemkundOnly ? 'none' : '';
+    });
+    ['mainHaulHemkundBrief', 'lastMileHemkundBrief'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.style.display = hemkundOnly ? '' : 'none';
+    });
+    const ropewayGateHelper = document.getElementById('ropewayGateHelper');
+    if (ropewayGateHelper) ropewayGateHelper.textContent = hemkundOnly
+        ? 'A ropeway is proposed from Govindghat to Hemkund Sahib. Would you use it to reach the shrine if it were available?'
+        : 'Ropeways are proposed at Kedarnath, Hemkund Sahib, and Yamunotri under the National Ropeways Development Programme. Are you open to using one to reach the shrine if it were available?';
+    // The willingness-to-pay field keeps its name; wtpRopewayShrine records which ropeway it refers to.
+    const wtpQuestion = document.getElementById('wtpRopewayQuestion');
+    if (wtpQuestion) wtpQuestion.textContent = hemkundOnly
+        ? 'What is the maximum amount per person you would be willing to pay for the Govindghat–Hemkund Sahib ropeway (one-way)?'
+        : 'What is the maximum amount per person you would be willing to pay for ropeway at Kedarnath (one-way)?';
+    const wtpShrine = document.getElementById('wtpRopewayShrine');
+    if (wtpShrine) wtpShrine.value = hemkundOnly ? 'Hemkund Sahib' : 'Kedarnath';
+
     // C1: Main-Haul Blocks
     Object.keys(mainHaulTasks).forEach(dham => {
         const dhamSlug = dham.replace(/\s/g, '');
@@ -827,14 +862,13 @@ function generateTaskHTML(task, index, segment) {
     const comfortClass = { Low: 'dce-comfort-low', Medium: 'dce-comfort-med', High: 'dce-comfort-high' };
     const isLastMile = segment && segment.startsWith('last_mile');
     const comfortDesc = isLastMile
-        ? { Low: 'Steep trek, fully exposed to weather', Medium: 'Assisted ride (pony/doli), moderate effort', High: 'Seated cabin, sheltered, no physical exertion' }
-        : { Low: 'Crowded seats, long tiring ride', Medium: 'Adequate seating, manageable journey', High: 'Spacious seat, smooth and relaxed ride' };
+        ? { Low: 'Steep, exposed to weather', Medium: 'Assisted ride, some effort', High: 'Seated, sheltered cabin' }
+        : { Low: 'Crowded, tiring', Medium: 'Adequate seating', High: 'Spacious, relaxed' };
     const relIcon  = { Low: '⚠', Medium: '~', High: '✓' };
     const relClass = { Low: 'dce-comfort-low', Medium: 'dce-comfort-med', High: 'dce-comfort-high' };
     const relDesc = isLastMile
-        ? { Low: 'May be closed (weather/season/full capacity); long wait before boarding', Medium: 'Mostly available; occasional short wait', High: 'Runs on schedule; minimal wait to board' }
-        : { Low: 'Frequent delays, diversions, or cancellations', Medium: 'Usually on schedule; minor delays possible', High: 'Fixed timetable, consistently on time' };
-    const modeIcon = { A: '🚌', B: '🚗', C: '🚆' };
+        ? { Low: 'May be closed; long wait', Medium: 'Short waits at times', High: 'On schedule, little wait' }
+        : { Low: 'Frequent delays or cancellations', Medium: 'Minor delays possible', High: 'On time' };
 
     const showTransfers = !(task['Transfers_A'] === 0 && task['Transfers_B'] === 0 && task['Transfers_C'] === 0);
 
@@ -845,7 +879,7 @@ function generateTaskHTML(task, index, segment) {
     ];
 
     let cardsHTML = `<div class="dce-task">
-        <div class="dce-task-header">Task ${escapeHTML(index)}: Which option would you choose for this journey?</div>
+        <div class="dce-task-header">Task ${escapeHTML(index)}: Which would you choose?</div>
         <div class="dce-cards">`;
 
     alternatives.forEach(alt => {
@@ -857,7 +891,7 @@ function generateTaskHTML(task, index, segment) {
 
         cardsHTML += `
         <div class="dce-card" id="card-${escapeAttribute(taskName)}-${alt.id}">
-            <div class="dce-card-header">${modeIcon[alt.id] || ''} ${escapeHTML(alt.name)}</div>
+            <div class="dce-card-header">${getChoiceCardIcon(alt.name)} ${escapeHTML(alt.name)}</div>
             <div class="dce-attr"><span class="dce-label">Cost</span><span class="dce-value dce-cost">₹${escapeHTML(cost)}</span></div>
             <div class="dce-attr"><span class="dce-label">Travel Time</span><span class="dce-value">${escapeHTML(time)} hrs</span></div>
             <div class="dce-attr"><span class="dce-label">Comfort</span><span class="dce-value ${comfortClass[comfort] || ''}"><strong>${comfortIcon[comfort] || ''} ${escapeHTML(comfort)}</strong><br><small>${comfortDesc[comfort] || ''}</small></span></div>
@@ -875,6 +909,14 @@ function generateTaskHTML(task, index, segment) {
 
     cardsHTML += `</div></div>`;
     return cardsHTML;
+}
+
+// Card icon follows the mode name (railway and ropeway first, as their names also mention bus/taxi).
+function getChoiceCardIcon(mode = '') {
+    const value = String(mode).toLowerCase();
+    if (/rail|train/.test(value)) return '🚆';
+    if (/ropeway|cable|gondola/.test(value)) return '🚡';
+    return getJourneyModeIcon(mode);
 }
 
 function highlightSelectedCard(taskName, selectedId) {
@@ -930,7 +972,7 @@ function getJourneyPlaceCode(place = '') {
     return codes[normalized] || String(place);
 }
 
-// ── Dham route metadata for pictorial preview banners ──────────────────────
+// ── Shrine route metadata for pictorial preview banners ──────────────────────
 // profile: [[x%, y%], …]  where x=0 is trailhead, x=100 is shrine;
 //   y=100 = baseline altitude, y=0 = highest point (shrine)
 const DHAM_ROUTE_INFO = {
@@ -991,10 +1033,7 @@ function dhamRouteBannerHTML(dham) {
 
 function journeyPlaceHTML(place, icon, kind = 'destination') {
     const fullName = String(place || 'Location');
-    const code = getJourneyPlaceCode(fullName);
-    const label = code === fullName
-        ? escapeHTML(fullName)
-        : `<abbr title="${escapeAttribute(fullName)}" aria-label="${escapeAttribute(fullName)}">${escapeHTML(code)}</abbr>`;
+    const label = `<span class="journey-node-name">${escapeHTML(fullName)}</span>`;
     const isTransfer = kind === 'transfer';
     return `<span class="journey-node${isTransfer ? ' journey-node-transfer' : ''}" title="${escapeAttribute(fullName)}${isTransfer ? ' vehicle/mode change' : ''}"><span class="journey-node-icon">${isTransfer ? '🔄' : icon}</span>${label}${isTransfer ? '<span class="journey-node-kind">Transfer</span>' : ''}</span>`;
 }
@@ -1029,7 +1068,6 @@ function journeyFlowHTML(legs) {
         const forwardIconClass = /helicopter|pony|mule|walk|trek|bike|motorcycle|scooter|two-wheeler|bus|shuttle|jeep|taxi|car|vehicle|pithu|kandi/i.test(mode)
             ? ' journey-mode-icon-forward'
             : '';
-        const routeLabel = `${getJourneyPlaceCode(leg.from)} → ${getJourneyPlaceCode(leg.to)}`;
         const details = [];
         if (leg.timeLabel) details.push(escapeHTML(leg.timeLabel));
         else if (leg.time !== undefined && leg.time !== '') details.push(`${escapeHTML(leg.time)} hr`);
@@ -1037,7 +1075,7 @@ function journeyFlowHTML(legs) {
         else if (leg.cost !== undefined && leg.cost !== '') details.push(`₹${escapeHTML(leg.cost)}`);
         if (leg.waiting !== undefined && leg.waiting !== '') details.push(`Wait ${escapeHTML(leg.waiting)} min`);
         html += `<span class="journey-connector">
-            <span class="journey-segment-route" title="${escapeAttribute(`${leg.from} to ${leg.to}`)}">Leg ${index + 1}: ${escapeHTML(routeLabel)}</span>
+            <span class="journey-segment-route" title="${escapeAttribute(`${leg.from} to ${leg.to}`)}">Leg ${index + 1}</span>
             <span class="journey-line"></span>
             <span class="journey-mode-icon${forwardIconClass}" title="${escapeAttribute(mode)}">${modeIcon}</span>
             <span class="journey-mode-label">${escapeHTML(mode)}</span>
@@ -1047,7 +1085,7 @@ function journeyFlowHTML(legs) {
         ${journeyPlaceHTML(leg.to, '📍', leg.toKind || 'destination')}`;
     });
     const transferLegend = legs.some(leg => leg.toKind === 'transfer')
-        ? '<div class="journey-transfer-legend">🔄 Intermediate transfer/change location &nbsp; · &nbsp; 📍 Dham base or destination</div>'
+        ? '<div class="journey-transfer-legend">🔄 Intermediate transfer/change location &nbsp; · &nbsp; 📍 Shrine base or destination</div>'
         : '';
     return `${transferLegend}<div class="journey-flow">${html}</div>`;
 }
@@ -1093,7 +1131,7 @@ function renderMainHaulJourneyPreview() {
     const orderedDhams = getOrderedDhams();
     const continuity = document.querySelector('input[name="onwardVehicleContinuity"]:checked')?.value || '';
     if (!startControl || !orderedDhams.length || !continuity) {
-        preview.innerHTML = '<div class="journey-visual-title">Your onward journey</div><p class="journey-visual-empty">Select your starting point, Dham order, and vehicle choice to build the route.</p>';
+        preview.innerHTML = '<div class="journey-visual-title">Your onward journey</div><p class="journey-visual-empty">Select your starting point, shrine order, and vehicle choice to build the route.</p>';
         return;
     }
 
@@ -1293,6 +1331,16 @@ function renderLastMileJourneyPreview() {
                         : ''
                 });
             }
+            const mountainDestination = document.querySelector('[name="lastMileApproachDestination_HemkundSahib"]:checked')?.value || 'Ghangaria';
+            legs.push({
+                from: 'Pulna',
+                to: mountainDestination,
+                mode: document.querySelector('[name="lastMileApproachMountainMode_HemkundSahib"]:checked')?.value || '',
+                time: (() => { const b = document.querySelector('[name="lastMileApproachMountainTimeBand_HemkundSahib"]')?.value || ''; return b === 'exact' ? document.querySelector('[name="lastMileApproachMountainTime_HemkundSahib"]')?.value || '' : ''; })(),
+                timeLabel: (() => { const b = document.querySelector('[name="lastMileApproachMountainTimeBand_HemkundSahib"]')?.value || ''; return b !== 'exact' ? b : ''; })(),
+                cost: (() => { const b = document.querySelector('[name="lastMileApproachMountainCostBand_HemkundSahib"]')?.value || ''; return b === 'exact' ? document.querySelector('[name="lastMileApproachMountainCost_HemkundSahib"]')?.value || '' : ''; })(),
+                costLabel: (() => { const b = document.querySelector('[name="lastMileApproachMountainCostBand_HemkundSahib"]')?.value || ''; return b !== 'exact' ? b : ''; })()
+            });
         }
         if (dham === 'Kedarnath') {
             const accessType = document.querySelector('input[name="kedarnathAccessType"]:checked')?.value || '';
@@ -1324,7 +1372,8 @@ function renderLastMileJourneyPreview() {
                 });
             }
         }
-        if (!isHelicopterRoute) {
+        const hemkundDirect = dham === 'Hemkund Sahib' && document.querySelector('[name="lastMileApproachDestination_HemkundSahib"]:checked')?.value === 'Hemkund Sahib';
+        if (!isHelicopterRoute && !hemkundDirect) {
             const route = getLastMileRouteSegment(dham).split('→').map(value => value.trim());
             legs.push({
                 from: route[0] || getMainHaulBaseDestination(dham),
@@ -1341,34 +1390,33 @@ function renderLastMileJourneyPreview() {
             });
         }
 
+        // "Same as onward" retraces every onward leg in reverse; "Different" uses the legs entered on the return card.
         const returnType = document.querySelector(`input[name="lastMileReturnType_${slug}"]:checked`)?.value || '';
+        const returnLegs = legs.slice().reverse().map(leg => ({ ...leg, from: leg.to, to: leg.from, waiting: '' }));
+        updateLastMileReturnRouteText(slug, returnLegs);
         let returnHTML = '';
-        const outwardLastLeg = legs[legs.length - 1];
-        if (returnType === 'Same as onward' && outwardLastLeg) {
-            returnHTML = `<div class="journey-direction"><b>Return</b>${journeyFlowHTML([{
-                from: outwardLastLeg.to, to: outwardLastLeg.from, mode: outwardLastLeg.mode,
-                time: outwardLastLeg.time, cost: outwardLastLeg.cost
-            }])}</div>`;
-        } else if (returnType === 'Different' && outwardLastLeg) {
-            const retTimeBand = document.querySelector(`select[name="lastMileReturnTimeBand_${slug}"]`)?.value || '';
-            const retCostBand = document.querySelector(`select[name="lastMileReturnCostBand_${slug}"]`)?.value || '';
-            returnHTML = `<div class="journey-direction"><b>Return</b>${journeyFlowHTML([{
-                from: outwardLastLeg.to,
-                to: outwardLastLeg.from,
-                mode: document.querySelector(`select[name="lastMileReturnMode_${slug}"]`)?.value || '',
-                time: retTimeBand === 'exact' ? document.querySelector(`input[name="lastMileReturnTime_${slug}"]`)?.value || '' : '',
-                timeLabel: retTimeBand !== 'exact' ? retTimeBand : '',
-                cost: retCostBand === 'exact' ? document.querySelector(`input[name="lastMileReturnCost_${slug}"]`)?.value || '' : '',
-                costLabel: retCostBand !== 'exact' ? retCostBand : ''
-            }])}</div>`;
+        if (returnType === 'Different') {
+            returnLegs.splice(0, returnLegs.length, ...getLastMileReturnLegValues(slug));
+        }
+        if ((returnType === 'Same as onward' || returnType === 'Different') && returnLegs.length) {
+            returnHTML = `<div class="journey-direction"><b>Return</b>${journeyFlowHTML(returnLegs)}</div>`;
         }
         const directionLabels = returnHTML ? `<div class="journey-direction"><b>Onward</b>${journeyFlowHTML(legs)}</div>${returnHTML}` : journeyFlowHTML(legs);
-        groups.push(`<div class="journey-flow-group">${dhamRouteBannerHTML(dham)}${directionLabels}</div>`);
+        const ghangariaStop = dham === 'Hemkund Sahib' && !hemkundDirect
+            ? document.querySelector('[name="lastMileApproachStop_HemkundSahib"]:checked')?.value || '' : '';
+        const stopHTML = ghangariaStop ? `<p class="field-helper">Ghangaria: ${escapeHTML(ghangariaStop)}</p>` : '';
+        groups.push(`<div class="journey-flow-group">${dhamRouteBannerHTML(dham)}${directionLabels}${stopHTML}</div>`);
     });
 
     preview.innerHTML = groups.length
         ? `<div class="journey-visual-title">Your shrine approach</div>${groups.join('')}`
-        : '<div class="journey-visual-title">Your shrine approach</div><p class="journey-visual-empty">Select a Dham and last-mile mode to build the route.</p>';
+        : '<div class="journey-visual-title">Your shrine approach</div><p class="journey-visual-empty">Select a shrine and last-mile mode to build the route.</p>';
+}
+
+function updateLastMileReturnRouteText(slug, returnLegs) {
+    const routeNote = document.querySelector(`#last-mile-return-${slug} .last-mile-return-route`);
+    if (!routeNote || !returnLegs.length) return;
+    routeNote.textContent = `Same as onward means: ${[returnLegs[0].from, ...returnLegs.map(leg => leg.to)].join(' → ')}`;
 }
 
 function renderJourneyPreviews() {
@@ -1574,8 +1622,8 @@ function createPrimaryModeRowHTML(index, dham = '', rowType = 'manual', segmentN
             <td data-label="Fare Entered As"><select name="primaryFareBasis_${fieldSuffix}" required>${getFareBasisOptionsHTML()}</select></td>
             <td class="occupancy-cell" data-label="Vehicle Occupancy" data-occupancy-for="primaryOccupancy_${fieldSuffix}">${getCompactChoiceButtonsHTML(`primaryOccupancy_${fieldSuffix}`, getVehicleOccupancyChoices())}</td>
             <td class="primary-helicopter-details" data-label="Helicopter Details" style="display:none;">
-              <div class="helicopter-package-scope"><label>Helicopter service used${getCompactChoiceButtonsHTML(`primaryHelicopterScope_${fieldSuffix}`, [['Single Dham shuttle','Single Dham'],['Do Dham package','Do Dham: Kedarnath + Badrinath'],['Complete Char Dham package','Complete Char Dham'],['Other/private itinerary','Other/private']])}</label></div>
-              <div class="helicopter-covered-dhams" style="display:none;"><span class="helicopter-covered-title">Select the Dham covered</span><div class="compact-choice-buttons checkbox-choice-buttons">${helicopterDhamButtons}</div><small class="helicopter-covered-help">Select exactly one.</small></div>
+              <div class="helicopter-package-scope"><label>Helicopter service used${getCompactChoiceButtonsHTML(`primaryHelicopterScope_${fieldSuffix}`, [['Single Dham shuttle','Single Shrine'],['Do Dham package','Do Dham: Kedarnath + Badrinath'],['Complete Char Dham package','Complete Char Dham'],['Other/private itinerary','Other/private']])}</label></div>
+              <div class="helicopter-covered-dhams" style="display:none;"><span class="helicopter-covered-title">Select the shrine covered</span><div class="compact-choice-buttons checkbox-choice-buttons">${helicopterDhamButtons}</div><small class="helicopter-covered-help">Select exactly one.</small></div>
               <label>Helicopter boarding point${getCompactChoiceButtonsHTML(`primaryHelicopterBoardingPoint_${fieldSuffix}`, [['Sahastradhara, Dehradun','Sahastradhara, Dehradun'],['Sersi','Sersi'],['Phata','Phata'],['Guptkashi','Guptkashi'],['Other','Other']])}</label>
               <label>Whole package duration${getCompactChoiceButtonsHTML(`primaryHelicopterPackageDuration_${fieldSuffix}`, getHelicopterDurationChoices())}</label>
               <label>What did the fare include?${getCompactChoiceButtonsHTML(`primaryHelicopterFareIncludes_${fieldSuffix}`, [['Flight only','Flight only'],['Flight and local transfers','Flight + local transfers'],['Full package','Stay, meals + transfers'],['Other','Other']])}</label>
@@ -1668,11 +1716,11 @@ function updateHelicopterScopeUI(scopeOrRow) {
     const requiredCount = scope === 'Single Dham shuttle' ? 1 : 0;
     const title = covered?.querySelector('.helicopter-covered-title');
     const help = covered?.querySelector('.helicopter-covered-help');
-    if (title) title.textContent = requiredCount === 1 ? 'Which Dham was covered?' : requiredCount === 2 ? 'Which two Dhams were covered?' : 'Which Dhams were covered?';
+    if (title) title.textContent = requiredCount === 1 ? 'Which shrine was covered?' : requiredCount === 2 ? 'Which two shrines were covered?' : 'Which Shrines were covered?';
     if (help) help.textContent = requiredCount ? `Select exactly ${requiredCount === 1 ? 'one' : 'two'}.` : 'Select all that apply.';
     const coveredInputs = Array.from(covered?.querySelectorAll('input[type="checkbox"]') || []);
     const selectedCount = coveredInputs.filter(input => input.checked).length;
-    coveredInputs[0]?.setCustomValidity(requiredCount && selectedCount !== requiredCount ? `Please select exactly ${requiredCount} Dham${requiredCount > 1 ? 's' : ''}.` : '');
+    coveredInputs[0]?.setCustomValidity(requiredCount && selectedCount !== requiredCount ? `Please select exactly ${requiredCount} shrine${requiredCount > 1 ? 's' : ''}.` : '');
     details.querySelectorAll('input[name^="primaryHelicopterScope_"]').forEach(input => input.setCustomValidity(''));
     const scopeInput = details.querySelector('input[name^="primaryHelicopterScope_"]:checked');
     const visited = getVisitedDhams();
@@ -1681,7 +1729,7 @@ function updateHelicopterScopeUI(scopeOrRow) {
         : scope === 'Complete Char Dham package'
             ? ['Yamunotri', 'Gangotri', 'Kedarnath', 'Badrinath'].filter(dham => !visited.includes(dham))
             : [];
-    scopeInput?.setCustomValidity(missingPackageDhams.length ? `Please add ${missingPackageDhams.join(', ')} to the Dham visit list for this package.` : '');
+    scopeInput?.setCustomValidity(missingPackageDhams.length ? `Please add ${missingPackageDhams.join(', ')} to the shrine visit list for this package.` : '');
     const suffix = row.querySelector('input[name^="primaryMode_"]')?.name.replace('primaryMode_', '') || '';
     const costCell = row.querySelector('.primary-cost-cell');
     if (costCell && suffix) {
@@ -1825,10 +1873,10 @@ function updateMainHaulTransferSelectors() {
     }).join('');
 
     container.innerHTML = `
-        <h4>Transfers before reaching base/Dham</h4>
+        <h4>Transfers before reaching base/shrine</h4>
         ${visitedDhams.length
             ? rowsHTML
-            : '<p class="field-helper">Select Dhams in A2 to show separate transfer fields for each route.</p>'}
+            : '<p class="field-helper">Select Shrines in A2 to show separate transfer fields for each route.</p>'}
     `;
 
     lockEnglishOptionValues(container);
@@ -1856,8 +1904,8 @@ function updatePrimaryModeTable() {
     updatePrimaryModeRouteCells();
     const hint = document.getElementById('mainHaulTransferHint');
     if (hint) hint.textContent = firstDham
-        ? `First journey leg: ${getSelectedStartPointLabel()} → ${getMainHaulBaseDestination(firstDham)}. Later legs appear under Inter-Dham Travel.`
-        : 'Select your Dham visit order to show the first journey leg.';
+        ? `First journey leg: ${getSelectedStartPointLabel()} → ${getMainHaulBaseDestination(firstDham)}. Later legs appear under Inter-Shrine Travel.`
+        : 'Select your shrine visit order to show the first journey leg.';
     handleOnwardVehicleContinuity();
 }
 
@@ -1953,7 +2001,7 @@ function handleOnwardVehicleContinuity() {
         cell.style.display = sameVehicle || helicopter ? 'none' : '';
     });
     document.querySelectorAll('#primaryModeTable .primary-dham-label').forEach(label => {
-        label.textContent = sameVehicle ? 'Complete onward journey' : (getOrderedDhams()[0] || 'First Dham');
+        label.textContent = sameVehicle ? 'Complete onward journey' : (getOrderedDhams()[0] || 'First Shrine');
     });
 
     if (sameVehicle) {
@@ -1969,8 +2017,8 @@ function handleOnwardVehicleContinuity() {
     } else if (hint && choice === 'Changed vehicle or mode') {
         const firstDham = getOrderedDhams()[0] || '';
         hint.textContent = firstDham
-            ? `First journey leg: ${getSelectedStartPointLabel()} → ${getMainHaulBaseDestination(firstDham)}. Later legs appear under Inter-Dham Travel.`
-            : 'Select your Dham visit order to show the first journey leg.';
+            ? `First journey leg: ${getSelectedStartPointLabel()} → ${getMainHaulBaseDestination(firstDham)}. Later legs appear under Inter-Shrine Travel.`
+            : 'Select your shrine visit order to show the first journey leg.';
     }
 
     updatePrimaryModeRouteCells();
@@ -2229,7 +2277,7 @@ function updateLastMileCostChoice(row, migrateExact = false) {
     const choice = row?.querySelector('select[name^="lastMileCostBand_"]');
     const exact = row?.querySelector('input[name^="lastMileCost_"]');
     if (!choice || !exact) return;
-    const dham = row.cells[0].textContent.trim();
+    const dham = row.dataset.dham || row.cells?.[0]?.textContent.trim() || '';
     if (choice.dataset.mode !== mode) {
         const previous = choice.value;
         const firstBuild = choice.dataset.mode === undefined;
@@ -2258,9 +2306,10 @@ function createLastMileRowHTML(dham) {
     const dhamSlug = dham.replace(/\s/g, '');
     const modeOptions = getLastMileModeOptionsHTML(dham);
     const routeValue = getLastMileRouteSegment(dham);
+    if (dham === 'Hemkund Sahib') return createHemkundLeg3HTML(dham, dhamSlug, modeOptions, routeValue);
 
     return `
-        <tr id="last-mile-row-${dhamSlug}">
+        <tr id="last-mile-row-${dhamSlug}" data-dham="${escapeAttribute(dham)}">
             <td>${dham}</td>
             <td><span class="last-mile-route-label">${escapeHTML(routeValue)}</span><input type="hidden" name="lastMileRoute_${dhamSlug}" value="${escapeAttribute(routeValue)}"></td>
             <td><select name="lastMileMode_${dhamSlug}" required>${modeOptions}</select></td>
@@ -2268,6 +2317,33 @@ function createLastMileRowHTML(dham) {
             <td><label><select name="lastMileCostBand_${dhamSlug}" required><option value="">--Choose a cost range--</option>${getLastMileCostBands(dham, '').map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')}<option value="exact">Other / exact amount</option></select></label><label hidden>Exact cost per person (₹)<input type="number" name="lastMileCost_${dhamSlug}" min="0" step="any" placeholder="e.g., 2500" disabled></label></td>
             <td><button type="button" class="delete-btn" onclick="deleteLastMileRow('${dhamSlug}')">Remove</button></td>
         </tr>`;
+}
+
+// Hemkund's final leg sits inside the Hemkund onward card instead of the last-mile table.
+function createHemkundLeg3HTML(dham, dhamSlug, modeOptions, routeValue) {
+    return `
+        <div class="return-leg" id="last-mile-row-${dhamSlug}" data-dham="${escapeAttribute(dham)}">
+            <div class="return-leg-title">Leg 3: <span class="last-mile-route-label">${escapeHTML(routeValue)}</span></div>
+            <input type="hidden" name="lastMileRoute_${dhamSlug}" value="${escapeAttribute(routeValue)}">
+            <div class="return-leg-fields">
+                <label>Mode<select name="lastMileMode_${dhamSlug}" required>${modeOptions}</select></label>
+                <div class="return-field-group"><label>Time<select name="lastMileTimeBand_${dhamSlug}" required><option value="">--Choose a time band--</option>${getLastMileTimeBands(dham).map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')}<option value="exact">Other / exact hours</option></select></label><label hidden>Exact one-way time (hours)<input type="number" name="lastMileTime_${dhamSlug}" min="0" step="any" placeholder="e.g., 4.5" disabled></label></div>
+                <div class="return-field-group"><label>Cost per person<select name="lastMileCostBand_${dhamSlug}" required><option value="">--Choose a cost range--</option>${getLastMileCostBands(dham, '').map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')}<option value="exact">Other / exact amount</option></select></label><label hidden>Exact cost per person (₹)<input type="number" name="lastMileCost_${dhamSlug}" min="0" step="any" placeholder="e.g., 2500" disabled></label></div>
+            </div>
+        </div>`;
+}
+
+function getLastMileRows() {
+    return Array.from(document.querySelectorAll('[id^="last-mile-row-"]'));
+}
+
+// Hide the last-mile table (and its cost note) when every shrine's last mile is entered elsewhere.
+function updateLastMileTableVisibility() {
+    const hasTableRows = !!lastMileTableBody?.querySelector('tr');
+    const table = document.getElementById('lastMileTable');
+    const note = document.getElementById('lastMileCostNote');
+    if (table) table.style.display = hasTableRows ? '' : 'none';
+    if (note) note.style.display = hasTableRows ? '' : 'none';
 }
 
 function getMainHaulHelicopterDhams() {
@@ -2316,7 +2392,7 @@ function getLastMileRouteSegment(dham) {
         Badrinath: 'Badrinath road-head → Badrinath Temple',
         Gangotri: 'Gangotri road-head → Gangotri Temple',
         Yamunotri: 'Janki Chatti/Kharsali → Yamunotri Temple',
-        'Hemkund Sahib': 'Pulna/Ghangaria → Hemkund Sahib'
+        'Hemkund Sahib': 'Ghangaria → Hemkund Sahib'
     };
     return routesByDham[dham] || `${dham} route → Temple`;
 }
@@ -2335,8 +2411,8 @@ function deleteLastMileRow(dhamSlug) {
         updateKedarnathAccessUI();
     }
     if (dhamSlug === 'HemkundSahib') {
-        const taxiDetails = document.getElementById('hemkundTaxiDetails');
-        if (taxiDetails) taxiDetails.style.display = 'none';
+        const hemkundOnwardCard = document.getElementById('hemkundOnwardCard');
+        if (hemkundOnwardCard) hemkundOnwardCard.style.display = 'none';
         document.querySelectorAll('input[name="lastMileApproachMode_HemkundSahib"]').forEach(el => { el.checked = false; });
         ['lastMileApproachTimeBand_HemkundSahib', 'lastMileApproachTime_HemkundSahib', 'lastMileApproachCost_HemkundSahib', 'lastMileApproachWaitingRange_HemkundSahib', 'lastMileApproachWaitingTime_HemkundSahib'].forEach(name => {
             const el = document.querySelector(`[name="${name}"]`);
@@ -2350,6 +2426,7 @@ function deleteLastMileRow(dhamSlug) {
     updateLastMileReturnSection(getVisitedDhams());
     
     deleteStayDurationRow(dhamSlug);
+    updateLastMileTableVisibility();
     updatePrimaryModeTable();
     updateRestLocationTable();
     updateDhamSequenceDropdowns();
@@ -2357,12 +2434,7 @@ function deleteLastMileRow(dhamSlug) {
 }
 
 function handleLastMileModeChange(select) {
-    updateLastMileCostChoice(select.closest('tr'));
-}
-
-function handleLastMileReturnModeChange(select) {
-    const slug = select.name.replace('lastMileReturnMode_', '');
-    updateLastMileReturnDetails(slug);
+    updateLastMileCostChoice(select.closest('[id^="last-mile-row-"]'));
 }
 
 function updateAccommodationCosts(migrateExact = false) {
@@ -2388,11 +2460,12 @@ function updateAccommodationCosts(migrateExact = false) {
 }
 
 function createStayDurationRowHTML(dham) {
+    const stayLocation = dham === 'Hemkund Sahib' ? 'Ghangaria' : dham;
     const dhamSlug = dham.replace(/\s/g, '');
     const accomOptions = `<option value="">--Select--</option><option>Hotel</option><option>Dharamshala</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
     return `
         <tr id="stay-duration-row-${dhamSlug}">
-            <td>${dham}</td>
+            <td>${stayLocation}${dham === 'Hemkund Sahib' ? '<small class="field-helper">Hemkund Sahib overnight base</small>' : ''}<input type="hidden" name="stayLocation_${dhamSlug}" value="${escapeAttribute(stayLocation)}"></td>
             <td><input type="radio" name="stayDuration_${dhamSlug}" value="<8h" required></td>
             <td><input type="radio" name="stayDuration_${dhamSlug}" value="8-12h"></td>
             <td><input type="radio" name="stayDuration_${dhamSlug}" value="12-18h"></td>
@@ -2420,20 +2493,21 @@ function updateLastMileTable() {
         if (!showKedarnathApproach) input.checked = false;
     });
     const showHemkundTaxi = lastMileDhams.includes('Hemkund Sahib');
-    const hemkundTaxiDetails = document.getElementById('hemkundTaxiDetails');
-    if (hemkundTaxiDetails) hemkundTaxiDetails.style.display = showHemkundTaxi ? 'block' : 'none';
-    const existingRows = new Set(Array.from(lastMileTableBody.querySelectorAll('tr')).map(tr => tr.id.replace('last-mile-row-', '')));
+    const hemkundOnwardCard = document.getElementById('hemkundOnwardCard');
+    if (hemkundOnwardCard) hemkundOnwardCard.style.display = showHemkundTaxi ? 'block' : 'none';
+    const existingRows = new Set(getLastMileRows().map(row => row.id.replace('last-mile-row-', '')));
 
     lastMileDhams.forEach(dham => {
         const dhamSlug = dham.replace(/\s/g, '');
         if (!existingRows.has(dhamSlug)) {
-            lastMileTableBody.insertAdjacentHTML('beforeend', createLastMileRowHTML(dham));
+            const rowParent = dham === 'Hemkund Sahib' ? document.getElementById('hemkundLeg3Slot') : lastMileTableBody;
+            rowParent.insertAdjacentHTML('beforeend', createLastMileRowHTML(dham));
             if (!document.getElementById(`stay-duration-row-${dhamSlug}`)) {
                 stayDurationTableBody.insertAdjacentHTML('beforeend', createStayDurationRowHTML(dham));
             }
-            lockEnglishOptionValues(lastMileTableBody.querySelector(`#last-mile-row-${dhamSlug}`));
+            lockEnglishOptionValues(document.getElementById(`last-mile-row-${dhamSlug}`));
             lockEnglishOptionValues(stayDurationTableBody.querySelector(`#stay-duration-row-${dhamSlug}`));
-            initializeOtherSpecifyFields(lastMileTableBody.querySelector(`#last-mile-row-${dhamSlug}`));
+            initializeOtherSpecifyFields(document.getElementById(`last-mile-row-${dhamSlug}`));
             initializeOtherSpecifyFields(stayDurationTableBody.querySelector(`#stay-duration-row-${dhamSlug}`));
         }
         const row = document.getElementById(`last-mile-row-${dhamSlug}`);
@@ -2453,7 +2527,7 @@ function updateLastMileTable() {
     });
 
     existingRows.forEach(dhamSlug => {
-        // Find the original Dham name (with spaces) to check against visitedDhams
+        // Find the original shrine name (with spaces) to check against visitedDhams
         const dhamName = Array.from(dhamCheckboxes).find(cb => cb.dataset.dham.replace(/\s/g, '') === dhamSlug)?.dataset.dham;
         
         if (dhamName && !lastMileDhams.includes(dhamName)) {
@@ -2462,6 +2536,7 @@ function updateLastMileTable() {
     });
     updateKedarnathAccessUI();
     updateHemkundTaxiDetails();
+    updateLastMileTableVisibility();
     updateLastMileReturnSection(lastMileDhams);
     updateAccommodationCosts();
 }
@@ -2476,29 +2551,100 @@ function getLastMileReturnModeOptionsHTML(dham) {
     return getLastMileModeOptionsHTML(dham);
 }
 
+const RETURN_MOUNTAIN_MODES = ['Trek/Walk', 'Pony/Mule', 'Palki/Dandi', 'Pithu / Kandi', 'Other'];
+const RETURN_SHORT_TIME_BANDS = ['Under 15 min', '15–30 min', '31–60 min', '1–2 hr', 'Over 2 hr'];
+const HEMKUND_PULNA_TIME_BANDS = ['Under 2 hr', '2–3 hr', '3–4 hr', '4–6 hr', '6–8 hr', '8–10 hr', 'Over 10 hr'];
+
+// Route choices offered when the return differs from the onward journey.
+function getLastMileReturnRouteOptions(dham) {
+    if (dham === 'Kedarnath') {
+        return [['Trek route', 'Trek route: Gaurikund → Sonprayag'], ['Helicopter', 'Helicopter to a helipad']];
+    }
+    return [];
+}
+
+// Return legs in travel order (shrine → base). Leg 1 keeps the original field names.
+function getLastMileReturnLegDefs(dham, slug) {
+    if (dham === 'Kedarnath') {
+        const route = document.querySelector(`input[name="lastMileReturnRoute_${slug}"]:checked`)?.value || '';
+        if (route === 'Helicopter') {
+            const helipad = document.querySelector(`select[name="lastMileReturnHelipad_${slug}"]`);
+            const helipadName = helipad?.value === 'Other'
+                ? (document.querySelector(`input[name="lastMileReturnHelipad_${slug}_otherSpecify"]`)?.value || 'Other helipad')
+                : (helipad?.value || 'Helipad');
+            return [{ from: 'Kedarnath Temple', to: helipadName, modes: ['Helicopter'], times: ['Under 15 min', '15–30 min', 'Over 30 min'], helipad: true }];
+        }
+        if (route === 'Trek route') {
+            return [
+                { from: 'Kedarnath Temple', to: 'Gaurikund', modes: RETURN_MOUNTAIN_MODES, times: getLastMileTimeBands('Kedarnath') },
+                { from: 'Gaurikund', to: 'Sonprayag', modes: ['Government-operated shuttle', 'Walk', 'Other'], times: RETURN_SHORT_TIME_BANDS }
+            ];
+        }
+        return [];
+    }
+    if (dham === 'Hemkund Sahib') {
+        return [
+            { from: 'Hemkund Sahib', to: 'Ghangaria', modes: RETURN_MOUNTAIN_MODES, times: getLastMileTimeBands('Hemkund Sahib') },
+            { from: 'Ghangaria', to: 'Pulna', modes: RETURN_MOUNTAIN_MODES, times: HEMKUND_PULNA_TIME_BANDS },
+            { from: 'Pulna', to: 'Govindghat', modes: ['Shared Taxi / Shuttle', 'Walk', 'Other'], times: RETURN_SHORT_TIME_BANDS }
+        ];
+    }
+    const [onwardFrom, onwardTo] = getLastMileRouteSegment(dham).split('→').map(value => value.trim());
+    const modes = Array.from(new DOMParser().parseFromString(`<select>${getLastMileReturnModeOptionsHTML(dham)}</select>`, 'text/html').querySelectorAll('option'))
+        .map(option => option.value || option.textContent).filter(Boolean);
+    return [{ from: onwardTo || getDhamShrineDestination(dham), to: onwardFrom || getReturnJourneyOrigin(dham), modes, times: getLastMileTimeBands(dham) }];
+}
+
+function getReturnLegSuffix(index) {
+    return index === 0 ? '' : `_Leg${index + 1}`;
+}
+
+function createLastMileReturnLegHTML(dham, slug, leg, index) {
+    const sfx = getReturnLegSuffix(index);
+    const single = leg.modes.length === 1;
+    const modeOptions = (single ? '' : '<option value="">--Select--</option>')
+        + leg.modes.map(mode => `<option value="${escapeAttribute(mode)}"${single ? ' selected' : ''}>${escapeHTML(mode)}</option>`).join('');
+    const timeOptions = leg.times.map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('');
+    const helipadField = leg.helipad
+        ? `<label>Landing helipad<select name="lastMileReturnHelipad_${slug}"><option value="">--Select--</option><option>Phata</option><option>Sersi</option><option>Guptkashi</option><option>Other</option></select></label>`
+        : '';
+    return `<div class="return-leg" data-leg="${index + 1}">
+        <div class="return-leg-title">Return leg ${index + 1}: <span class="return-leg-route">${escapeHTML(`${leg.from} → ${leg.to}`)}</span></div>
+        <input type="hidden" name="lastMileReturnLegRoute_${slug}${sfx}" value="${escapeAttribute(`${leg.from} → ${leg.to}`)}">
+        <div class="return-leg-fields">
+            ${helipadField}
+            <label>Mode<select name="lastMileReturnMode_${slug}${sfx}">${modeOptions}</select></label>
+            <div class="return-field-group">
+                <label>Time<select name="lastMileReturnTimeBand_${slug}${sfx}"><option value="">--Choose time band--</option>${timeOptions}<option value="exact">Other / exact hours</option></select></label>
+                <label style="display:none">Exact time (hours)<input type="number" name="lastMileReturnTime_${slug}${sfx}" min="0" step="any" placeholder="e.g., 3"></label>
+            </div>
+            <div class="return-field-group">
+                <label>Cost per person<select name="lastMileReturnCostBand_${slug}${sfx}"><option value="">--Select mode first--</option></select></label>
+                <label style="display:none">Exact cost per person (₹)<input type="number" name="lastMileReturnCost_${slug}${sfx}" min="0" placeholder="e.g., 1500"></label>
+            </div>
+        </div>
+    </div>`;
+}
+
 function createLastMileReturnCardHTML(dham) {
     const slug = getDhamSlug(dham);
-    const timeBandOptions = getLastMileTimeBands(dham)
-        .map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('');
-    const costBandOptions = getLastMileCostBands(dham, '')
-        .map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('');
-    return `<fieldset class="answer-question last-mile-return-card" id="last-mile-return-${slug}">
-        <legend>${escapeHTML(dham)} return from shrine</legend>
+    const routeOptions = getLastMileReturnRouteOptions(dham);
+    const routeQuestion = routeOptions.length
+        ? `<div class="return-route-choice"><div class="hemkund-field-title">How did you come back?</div><div class="answer-buttons">${routeOptions.map(([value, label]) =>
+            `<label class="answer-choice"><input type="radio" name="lastMileReturnRoute_${slug}" value="${escapeAttribute(value)}"><span>${escapeHTML(label)}</span></label>`).join('')}</div></div>`
+        : '';
+    return `<fieldset class="answer-question last-mile-return-card" id="last-mile-return-${slug}" data-dham="${escapeAttribute(dham)}">
+        <legend>${escapeHTML(dham)}: return journey</legend>
+        <p class="field-helper last-mile-return-route"></p>
         <div class="answer-buttons">
-            <label class="answer-choice"><input type="radio" name="lastMileReturnType_${slug}" value="Same as onward" required><span>Same mode and cost</span></label>
-            <label class="answer-choice"><input type="radio" name="lastMileReturnType_${slug}" value="Different"><span>Different mode or cost</span></label>
+            <label class="answer-choice"><input type="radio" name="lastMileReturnType_${slug}" value="Same as onward" required><span>Same as onward</span></label>
+            <label class="answer-choice"><input type="radio" name="lastMileReturnType_${slug}" value="Different"><span>Different mode or route</span></label>
             <label class="answer-choice"><input type="radio" name="lastMileReturnType_${slug}" value="Not completed"><span>Return not completed</span></label>
         </div>
         <div class="last-mile-return-details" id="last-mile-return-details-${slug}" style="display:none;">
-            <label>Return mode<select name="lastMileReturnMode_${slug}" disabled>${getLastMileReturnModeOptionsHTML(dham)}</select></label>
-            <div class="return-field-group">
-                <label>Return time<select name="lastMileReturnTimeBand_${slug}" disabled><option value="">--Choose time band--</option>${timeBandOptions}<option value="exact">Other / exact hours</option></select></label>
-                <label style="display:none">Exact return time (hours)<input type="number" name="lastMileReturnTime_${slug}" min="0" step="any" placeholder="e.g., 5" disabled></label>
-            </div>
-            <div class="return-field-group">
-                <label>Return cost per person<select name="lastMileReturnCostBand_${slug}" disabled><option value="">--Choose cost range--</option>${costBandOptions}<option value="exact">Other / exact amount</option></select></label>
-                <label style="display:none">Exact return cost per person (₹)<input type="number" name="lastMileReturnCost_${slug}" min="0" placeholder="e.g., 1500" disabled></label>
-            </div>
+            ${routeQuestion}
+            <p class="field-helper last-mile-return-leg">Enter each part of your return journey from the shrine.</p>
+            <div class="last-mile-return-legs"></div>
         </div>
     </fieldset>`;
 }
@@ -2513,60 +2659,121 @@ function updateLastMileReturnSection(visitedDhams = getVisitedDhams()) {
     visitedDhams.forEach(dham => {
         const slug = getDhamSlug(dham);
         const existing = document.getElementById(`last-mile-return-${slug}`);
-        if (existing && !existing.querySelector(`select[name="lastMileReturnTimeBand_${slug}"]`)) {
-            existing.remove();
-        }
+        if (existing && !existing.querySelector('.last-mile-return-legs')) existing.remove();
         if (!document.getElementById(`last-mile-return-${slug}`)) {
             container.insertAdjacentHTML('beforeend', createLastMileReturnCardHTML(dham));
-            initializeOtherSpecifyFields(document.getElementById(`last-mile-return-${slug}`));
         }
         updateLastMileReturnDetails(slug);
     });
 }
 
 function updateLastMileReturnDetails(slug, migrateExact = false) {
-    const isDifferent = document.querySelector(`input[name="lastMileReturnType_${slug}"]:checked`)?.value === 'Different';
+    const card = document.getElementById(`last-mile-return-${slug}`);
     const details = document.getElementById(`last-mile-return-details-${slug}`);
-    if (!details) return;
-    details.style.display = isDifferent ? 'grid' : 'none';
+    if (!card || !details) return;
+    const dham = card.dataset.dham;
+    const isDifferent = card.querySelector(`input[name="lastMileReturnType_${slug}"]:checked`)?.value === 'Different';
+    details.style.display = isDifferent ? 'block' : 'none';
 
-    const modeSelect = details.querySelector(`select[name="lastMileReturnMode_${slug}"]`);
-    const timeBand = details.querySelector(`select[name="lastMileReturnTimeBand_${slug}"]`);
-    const timeExact = details.querySelector(`input[name="lastMileReturnTime_${slug}"]`);
-    const costBand = details.querySelector(`select[name="lastMileReturnCostBand_${slug}"]`);
-    const costExact = details.querySelector(`input[name="lastMileReturnCost_${slug}"]`);
+    details.querySelectorAll(`input[name="lastMileReturnRoute_${slug}"]`).forEach(input => {
+        input.disabled = !isDifferent;
+        input.required = isDifferent;
+        if (!isDifferent) input.checked = false;
+    });
 
-    if (!timeBand || !costBand) return; // stale card without band selects caller will rebuild
-    [modeSelect, timeBand, costBand].forEach(ctrl => { if (ctrl) { ctrl.disabled = !isDifferent; ctrl.required = isDifferent; } });
+    // Rebuild the leg rows only when the route itself changes, so typed answers survive.
+    const legs = getLastMileReturnLegDefs(dham, slug);
+    const legsBox = details.querySelector('.last-mile-return-legs');
+    const signature = legs.map(leg => `${leg.helipad ? 'heli' : leg.from}|${leg.modes.join(',')}`).join(';');
+    if (legsBox.dataset.signature !== signature) {
+        legsBox.innerHTML = legs.map((leg, index) => createLastMileReturnLegHTML(dham, slug, leg, index)).join('');
+        legsBox.dataset.signature = signature;
+        lockEnglishOptionValues(legsBox);
+    }
+    const legNote = details.querySelector('.last-mile-return-leg');
+    if (legNote) legNote.textContent = legs.length ? 'Enter each part of your return journey from the shrine.' : 'Choose how you came back to see the return legs.';
 
-    const isTrek = isDifferent && modeSelect?.value === 'Trek/Walk';
+    legsBox.querySelectorAll('.return-leg').forEach((legEl, index) => {
+        const leg = legs[index];
+        const sfx = getReturnLegSuffix(index);
+        const q = name => legEl.querySelector(`[name="${name}_${slug}${sfx}"]`);
+        const modeSelect = q('lastMileReturnMode');
+        const timeBand = q('lastMileReturnTimeBand');
+        const timeExact = q('lastMileReturnTime');
+        const costBand = q('lastMileReturnCostBand');
+        const costExact = q('lastMileReturnCost');
+        const routeInput = q('lastMileReturnLegRoute');
+        const helipad = legEl.querySelector(`select[name="lastMileReturnHelipad_${slug}"]`);
 
-    // Time band / exact
-    if (migrateExact && timeBand && !timeBand.value && timeExact?.value) timeBand.value = 'exact';
-    if (migrateExact && timeBand?.value === 'exact' && !timeExact?.value) timeBand.value = '';
-    const showTimeExact = isDifferent && timeBand?.value === 'exact';
-    if (timeExact) {
+        if (leg && routeInput) {
+            routeInput.value = `${leg.from} → ${leg.to}`;
+            legEl.querySelector('.return-leg-route').textContent = routeInput.value;
+        }
+        if (routeInput) routeInput.disabled = !isDifferent;
+        if (helipad) {
+            helipad.disabled = !isDifferent;
+            helipad.required = isDifferent;
+            if (isDifferent) updateOtherSpecifyField(helipad);
+        }
+        [modeSelect, timeBand].forEach(ctrl => { ctrl.disabled = !isDifferent; ctrl.required = isDifferent; });
+
+        // Cost bands follow the leg's mode; changing mode clears the previous cost. Walking is ₹0.
+        const mode = modeSelect.value;
+        const isWalk = mode === 'Trek/Walk' || mode === 'Walk';
+        if (costBand.dataset.mode !== mode) {
+            const previous = costBand.value;
+            const bands = mode ? getLastMileCostBands(dham, isWalk ? 'Trek/Walk' : mode) : [];
+            costBand.innerHTML = `<option value="">${mode ? '--Choose cost range--' : '--Select mode first--'}</option>`
+                + bands.map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')
+                + (mode && !isWalk ? '<option value="exact">Other / exact amount</option>' : '');
+            const keepPrevious = restoringDraft || costBand.dataset.mode === undefined;
+            if (keepPrevious && Array.from(costBand.options).some(option => option.value === previous)) costBand.value = previous;
+            if (!keepPrevious) costExact.value = '';
+            costBand.dataset.mode = mode;
+        }
+        if (isWalk) costBand.value = 'No cost (₹0)';
+        costBand.disabled = !isDifferent;
+        costBand.required = isDifferent;
+
+        if (migrateExact && !timeBand.value && timeExact.value) timeBand.value = 'exact';
+        const showTimeExact = isDifferent && timeBand.value === 'exact';
         timeExact.closest('label').style.display = showTimeExact ? '' : 'none';
         timeExact.disabled = !showTimeExact;
         timeExact.required = showTimeExact;
         if (!showTimeExact) timeExact.value = '';
-    }
 
-    // Cost band / exact Trek/Walk forces No cost
-    if (isTrek && costBand) { costBand.value = 'No cost (₹0)'; if (costExact) costExact.value = '0'; }
-    if (costBand) costBand.disabled = !isDifferent || isTrek;
-    if (migrateExact && costBand && !costBand.value && costExact?.value && costExact.value !== '0') costBand.value = 'exact';
-    const showCostExact = isDifferent && costBand?.value === 'exact';
-    if (costExact) {
+        if (migrateExact && !costBand.value && costExact.value && !isWalk) costBand.value = 'exact';
+        const showCostExact = isDifferent && !isWalk && costBand.value === 'exact';
         costExact.closest('label').style.display = showCostExact ? '' : 'none';
-        costExact.disabled = !showCostExact;
+        if (isDifferent && isWalk) costExact.value = '0';
+        else if (!showCostExact) costExact.value = '';
+        // Walking keeps the hidden ₹0 enabled so it is still submitted.
+        costExact.disabled = !(isDifferent && (isWalk || showCostExact));
         costExact.required = showCostExact;
-        if (!showCostExact && !isTrek) costExact.value = '';
-    }
 
-    const otherInput = details.querySelector(`input[name="lastMileReturnMode_${slug}_otherSpecify"]`);
-    if (otherInput) { otherInput.disabled = !isDifferent; if (!isDifferent) otherInput.required = false; }
-    if (isDifferent && modeSelect) updateOtherSpecifyField(modeSelect);
+        const otherInput = legEl.querySelector(`input[name="lastMileReturnMode_${slug}${sfx}_otherSpecify"]`);
+        if (isDifferent) updateOtherSpecifyField(modeSelect);
+        else if (otherInput) { otherInput.required = false; otherInput.value = ''; }
+    });
+}
+
+// Values of the return legs entered on a "Different" return, for the route preview.
+function getLastMileReturnLegValues(slug) {
+    return Array.from(document.querySelectorAll(`#last-mile-return-${slug} .return-leg`)).map((legEl, index) => {
+        const sfx = getReturnLegSuffix(index);
+        const value = name => legEl.querySelector(`[name="${name}_${slug}${sfx}"]`)?.value || '';
+        const [from, to] = value('lastMileReturnLegRoute').split('→').map(part => part.trim());
+        const timeBand = value('lastMileReturnTimeBand');
+        const costBand = value('lastMileReturnCostBand');
+        return {
+            from, to,
+            mode: value('lastMileReturnMode'),
+            time: timeBand === 'exact' ? value('lastMileReturnTime') : '',
+            timeLabel: timeBand !== 'exact' ? timeBand : '',
+            cost: costBand === 'exact' ? value('lastMileReturnCost') : '',
+            costLabel: costBand !== 'exact' ? costBand : ''
+        };
+    });
 }
 
 function updateModeBlockVisibility(mode) {
@@ -2653,6 +2860,7 @@ function updateKedarnathAccessUI() {
 }
 
 function updateHemkundTaxiDetails() {
+    updateHemkundMountainDetails();
     const mode = document.querySelector('input[name="lastMileApproachMode_HemkundSahib"]:checked')?.value || '';
     const isTaxi = mode === 'Shared Taxi / Shuttle';
     const isWalk = mode === 'Walk';
@@ -2678,7 +2886,12 @@ function updateHemkundTaxiDetails() {
     const costLabel = document.getElementById('hemkundTaxiCostLabel');
     const costInput = document.querySelector('input[name="lastMileApproachCost_HemkundSahib"]');
     if (costLabel) costLabel.style.display = isTaxi ? '' : 'none';
-    if (costInput) { costInput.required = isTaxi; costInput.disabled = !isTaxi; if (!isTaxi) costInput.value = ''; }
+    if (costInput) {
+        costInput.required = isTaxi;
+        costInput.disabled = !isTaxi;
+        costInput.readOnly = true;
+        costInput.value = isTaxi ? '60' : '';
+    }
 
     const waitingLabel = document.getElementById('hemkundWaitingLabel');
     const range = document.querySelector('select[name="lastMileApproachWaitingRange_HemkundSahib"]');
@@ -2690,6 +2903,76 @@ function updateHemkundTaxiDetails() {
     const exact = document.querySelector('input[name="lastMileApproachWaitingTime_HemkundSahib"]');
     if (exactLabel) exactLabel.style.display = showExact ? '' : 'none';
     if (exact) { exact.required = showExact; exact.disabled = !showExact; if (!showExact) exact.value = ''; }
+}
+
+function updateHemkundMountainDetails() {
+    const active = !!document.getElementById('last-mile-row-HemkundSahib');
+    const details = document.getElementById('hemkundMountainDetails');
+    if (!details) return;
+    details.style.display = active ? 'block' : 'none';
+    const destination = details.querySelector('[name="lastMileApproachDestination_HemkundSahib"]:checked');
+    const viaGhangaria = destination?.value !== 'Hemkund Sahib';
+    details.querySelectorAll('input, select').forEach(control => {
+        control.disabled = !active;
+        control.required = active && !control.name.endsWith('_otherSpecify');
+        if (!active) { if (control.type === 'radio') control.checked = false; else control.value = ''; }
+    });
+    const mountainTimeBand = details.querySelector('[name="lastMileApproachMountainTimeBand_HemkundSahib"]');
+    const mountainTimeExact = details.querySelector('[name="lastMileApproachMountainTime_HemkundSahib"]');
+    if (restoringDraft && mountainTimeBand && !mountainTimeBand.value && mountainTimeExact?.value) mountainTimeBand.value = 'exact';
+    const showMountainTimeExact = active && mountainTimeBand?.value === 'exact';
+    document.getElementById('hemkundMountainTimeExactLabel').style.display = showMountainTimeExact ? '' : 'none';
+    if (mountainTimeExact) {
+        mountainTimeExact.disabled = !showMountainTimeExact;
+        mountainTimeExact.required = showMountainTimeExact;
+        if (!showMountainTimeExact) mountainTimeExact.value = '';
+    }
+    // Cost bands follow the selected mode (same Hemkund bands as the Ghangaria → Hemkund row);
+    // changing mode clears the previous cost. Walk is fixed at ₹0.
+    const mountainMode = details.querySelector('[name="lastMileApproachMountainMode_HemkundSahib"]:checked')?.value || '';
+    const walk = mountainMode === 'Trek/Walk';
+    const costBand = details.querySelector('[name="lastMileApproachMountainCostBand_HemkundSahib"]');
+    const cost = details.querySelector('[name="lastMileApproachMountainCost_HemkundSahib"]');
+    if (costBand && costBand.dataset.mode !== mountainMode) {
+        const previous = costBand.value;
+        const bands = mountainMode ? getLastMileCostBands('Hemkund Sahib', mountainMode) : [];
+        costBand.innerHTML = `<option value="">${mountainMode ? '-- Choose a cost range --' : '-- Select mode first --'}</option>`
+            + bands.map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')
+            + (mountainMode && !walk ? '<option value="exact">Other / exact amount</option>' : '');
+        const keepPrevious = restoringDraft || costBand.dataset.mode === undefined;
+        if (keepPrevious && Array.from(costBand.options).some(option => option.value === previous)) costBand.value = previous;
+        if (!keepPrevious && cost) cost.value = '';
+        costBand.dataset.mode = mountainMode;
+    }
+    if (costBand && walk) costBand.value = 'No cost (₹0)';
+    if (restoringDraft && costBand && !costBand.value && cost?.value && !walk) costBand.value = 'exact';
+    const showCostExact = active && !walk && costBand?.value === 'exact';
+    document.getElementById('hemkundMountainCostExactLabel').style.display = showCostExact ? '' : 'none';
+    if (cost) {
+        if (walk) cost.value = '0';
+        else if (!showCostExact) cost.value = '';
+        // Walk keeps the hidden ₹0 enabled so it is still submitted.
+        cost.disabled = !(active && (walk || showCostExact));
+        cost.required = showCostExact;
+    }
+    details.querySelectorAll('[name="lastMileApproachStop_HemkundSahib"]').forEach(stop => {
+        stop.disabled = !active || !viaGhangaria;
+        stop.required = active && viaGhangaria;
+        if (stop.disabled) stop.checked = false;
+    });
+    document.getElementById('hemkundGhangariaStopLabel').hidden = !viaGhangaria;
+    const leg2Route = document.getElementById('hemkundLeg2Route');
+    if (leg2Route) leg2Route.textContent = viaGhangaria ? 'Pulna → Ghangaria' : 'Pulna → Hemkund Sahib';
+    const row = document.getElementById('last-mile-row-HemkundSahib');
+    if (row) {
+        row.style.display = viaGhangaria ? '' : 'none';
+        row.querySelectorAll('input, select').forEach(control => {
+            control.disabled = !viaGhangaria;
+            control.required = viaGhangaria && control.tagName === 'SELECT';
+        });
+        updateLastMileTimeChoice(row);
+        updateLastMileCostChoice(row);
+    }
 }
 
 function updateKedarnathApproachDetails() {
@@ -2742,16 +3025,16 @@ function updateDhamSequenceDropdowns() {
         .filter(value => visitedDhams.includes(value));
     
     if (visitedDhams.length === 0) {
-        container.innerHTML = '<h4>Order of Dham Visits</h4><p style="color: grey;">Select Dhams in A2 to show visit-order fields.</p>';
+        container.innerHTML = '<h4>Order of Shrine Visits</h4><p style="color: grey;">Select Shrines in A2 to show visit-order fields.</p>';
         return;
     }
 
     if (visitedDhams.length === 1) {
-        container.innerHTML = `<h4>Order of Dham Visits</h4><p style="color: grey;">Only ${escapeHTML(visitedDhams[0])} selected. No order needed.</p>`;
+        container.innerHTML = `<h4>Order of Shrine Visits</h4><p style="color: grey;">Only ${escapeHTML(visitedDhams[0])} selected. No order needed.</p>`;
         return;
     }
     
-    let html = '<h4>Order of Dham Visits</h4><p class="field-helper">Choose your first stop, then your next stops in order.</p><div class="dham-sequence-grid">';
+    let html = '<h4>Order of Shrine Visits</h4><p class="field-helper">Choose your first stop, then your next stops in order.</p><div class="dham-sequence-grid">';
 
     for (let i = 0; i < visitedDhams.length; i++) {
         const selectedDham = previousSelections[i] || '';
@@ -2776,7 +3059,7 @@ function refreshDhamSequenceOptions() {
     selects.forEach(select => {
         const currentValue = select.value || select.dataset.selectedDham || '';
         const unavailableValues = new Set(selectedValues.filter(value => value !== currentValue));
-        let options = '<option value="">--Select Dham--</option>';
+        let options = '<option value="">--Select Shrine--</option>';
 
         visitedDhams.forEach(dham => {
             if (!unavailableValues.has(dham)) {
@@ -3007,7 +3290,7 @@ function updateMainHaulHeadings() {
     };
 
     if (mainHaulSectionHeading) {
-        mainHaulSectionHeading.textContent = `Section B1: Main-Haul Choice (${startPointLabel} → Base Camp / Dham Destination)`;
+        mainHaulSectionHeading.textContent = `Section B1: Main-Haul Choice (${startPointLabel} → Base Camp / Shrine Destination)`;
     }
 
     Object.entries(destinationsByDham).forEach(([dhamSlug, destination]) => {
@@ -3130,7 +3413,7 @@ function resetDynamicSurveyState() {
 
     const sequenceContainer = document.getElementById('dhamSequenceSelection');
     if (sequenceContainer) {
-        sequenceContainer.innerHTML = '<h4>Order of Dham Visits</h4><p style="color: grey;">Select Dhams in A2 to show visit-order fields.</p>';
+        sequenceContainer.innerHTML = '<h4>Order of Shrine Visits</h4><p style="color: grey;">Select Shrines in A2 to show visit-order fields.</p>';
     }
 
     document.querySelectorAll('[id^="main-haul-"][id$="-tasks"], [id^="last-mile-"][id$="-tasks"]').forEach(container => {
@@ -3359,7 +3642,7 @@ function getInterDhamTransferCardsHTML(pairKey, transferValue, getValue = () => 
         const locationListId = `interDhamTransferLocations_${suffix}`;
         const modeValue = getValue(modeName);
         return `<tr class="inter-dham-transfer-row" data-inter-transfer-pair="${escapeAttribute(pairKey)}"><td class="inter-dham-transfer-card" data-label="Intermediate Transfer">
-            <div class="inter-dham-transfer-heading"><span>🔄 Intermediate transfer ${number}</span><small class="inter-dham-transfer-route-note">Part of this inter-Dham route</small></div>
+            <div class="inter-dham-transfer-heading"><span>🔄 Intermediate transfer ${number}</span><small class="inter-dham-transfer-route-note">Part of this inter-shrine route</small></div>
             <label>Intermediate transfer location${getTransferLocationInputHTML(locationName, getValue(locationName), locationListId, locationSuggestions)}</label>
             <label>Mode after transfer${getRoadTravelModeButtonsHTML(modeName, modeValue)}</label>
             <label>Time after transfer${getCompactChoiceButtonsHTML(timeName, getIntermediateTimeChoices(), getValue(timeName))}</label>
@@ -3403,7 +3686,7 @@ function updateInterDhamTable() {
 
     section.querySelectorAll('input, select').forEach(control => { control.disabled = false; });
 
-    // Collect selected Dhams in sequence order from the sequence dropdowns
+    // Collect selected shrines in sequence order from the sequence dropdowns
     const seqSelects = document.querySelectorAll('#dhamSequenceSelection select');
     const orderedDhams = [];
     // Build a map: sequence number -> dham name from the select values
@@ -3416,7 +3699,7 @@ function updateInterDhamTable() {
     // Sort by sequence number
     Object.keys(seqMap).sort((a,b) => a-b).forEach(k => orderedDhams.push(seqMap[k]));
 
-    // If < 2 Dhams in sequence, hide section
+    // If < 2 Shrines in sequence, hide section
     if (orderedDhams.length < 2) {
         section.style.display = 'none';
         return;
@@ -3489,7 +3772,7 @@ function updateInterDhamTable() {
         updateInterDhamRouteLabel(pairKey);
     });
 
-    if (hint) hint.textContent = `${pairs.length} onward segment${pairs.length>1?'s':''} shown after your first Dham, based on your selected visit order.`;
+    if (hint) hint.textContent = `${pairs.length} onward segment${pairs.length>1?'s':''} shown after your first shrine, based on your selected visit order.`;
 }
 
 function copyPreviousLegSettings(button) {
@@ -3834,16 +4117,17 @@ function getLocalRawColumnGroups(responsesToExport) {
         { section: 'Visit History And Itinerary', fields: ['kedarnath', 'badrinath', 'gangotri', 'yamunotri', 'hemkund', 'dhamCurrentVisit', ...matching(/^ongoingDhamStatus_/), 'repeatVisitReason', 'priorModeExp', 'startPoint', 'otherStartPoint', 'totalDurationDays', ...matching(/^dhamSequence_\d+$/)] },
         { section: 'Main-Haul Transfers', fields: ['onwardVehicleContinuity', 'mainHaulTransferCount_Kedarnath', 'mainHaulTransferCount_Badrinath', 'mainHaulTransferCount_Gangotri', 'mainHaulTransferCount_Yamunotri', 'mainHaulTransferCount_HemkundSahib', ...matching(/^mainHaulTransfer(Location|Mode|Time|TimeRange|Cost|CostRange|FareBasis|Occupancy)_/)] },
         { section: 'Main-Haul Travel Rows', fields: dynamicIndexed(['primaryDham', 'primaryRoute', 'primaryMode', 'primaryTime', 'primaryTimeRange', 'primaryCost', 'primaryCostRange', 'primaryFareBasis', 'primaryOccupancy', 'primaryHelicopterScope', 'primaryHelicopterCoveredDhams', 'primaryHelicopterBoardingPoint', 'primaryHelicopterPackageDuration', 'primaryHelicopterFareIncludes', 'primaryHelicopterBookingDifficulty', 'primaryHelicopterWaiting', 'primaryHelicopterDisruption', 'primaryHelicopterWeightCharge']) },
-        { section: 'Inter-Dham Travel', fields: allKeys.filter(key => /^interDham(From|To|Route|Mode|Time|Cost|FareBasis|Occupancy|TransferCount|TransferLocation|TransferMode|TransferTime|TransferCost|TransferFareBasis|TransferOccupancy|TransferLocations|ModesAfterTransfer)_/.test(key)).sort(naturalLocalSort) },
+        { section: 'Inter-Shrine Travel', fields: allKeys.filter(key => /^interDham(From|To|Route|Mode|Time|Cost|FareBasis|Occupancy|TransferCount|TransferLocation|TransferMode|TransferTime|TransferCost|TransferFareBasis|TransferOccupancy|TransferLocations|ModesAfterTransfer)_/.test(key)).sort(naturalLocalSort) },
         { section: 'Stopovers', fields: dynamicIndexed(['restRoute', 'restLocation', 'restPurpose', 'restDurationChoice', 'restDuration', 'restAccom', 'restCostChoice', 'restCost']) },
-        { section: 'Last-Mile Travel', fields: ['kedarnathAccessType', 'kedarnathHelicopterBoardingPoint', 'kedarnathHelicopterTime', 'kedarnathHelicopterCost', 'kedarnathHelicopterWaitingTime', ...allKeys.filter(key => /^(lastMileApproachMode|lastMileApproachTimeBand|lastMileApproachTime|lastMileApproachCost|lastMileRoute|lastMileMode|lastMileTimeBand|lastMileTime|lastMileCostBand|lastMileCost|lastMileReturnType|lastMileReturnMode|lastMileReturnTimeBand|lastMileReturnTime|lastMileReturnCostBand|lastMileReturnCost)_/.test(key)).sort(naturalLocalSort)] },
-        { section: 'Stay And Accommodation', fields: allKeys.filter(key => /^(stayDuration|stayAccom|stayAccomCost|stayAccomCostRange|stayAccomCostBasis)_/.test(key)).sort(naturalLocalSort) },
+        { section: 'Last-Mile Travel', fields: ['kedarnathAccessType', 'kedarnathHelicopterBoardingPoint', 'kedarnathHelicopterTime', 'kedarnathHelicopterCost', 'kedarnathHelicopterWaitingTime', ...allKeys.filter(key => /^(lastMileApproachDestination|lastMileApproachMountainMode|lastMileApproachMountainTimeBand|lastMileApproachMountainTime|lastMileApproachMountainCostBand|lastMileApproachMountainCost|lastMileApproachStop|lastMileApproachMode|lastMileApproachTimeBand|lastMileApproachTime|lastMileApproachCost|lastMileRoute|lastMileMode|lastMileTimeBand|lastMileTime|lastMileCostBand|lastMileCost|lastMileReturnType|lastMileReturnRoute|lastMileReturnHelipad|lastMileReturnLegRoute|lastMileReturnMode|lastMileReturnTimeBand|lastMileReturnTime|lastMileReturnCostBand|lastMileReturnCost)_/.test(key)).sort(naturalLocalSort)] },
+        { section: 'Stay And Accommodation', fields: allKeys.filter(key => /^(stayLocation|stayDuration|stayAccom|stayAccomCost|stayAccomCostRange|stayAccomCostBasis)_/.test(key)).sort(naturalLocalSort) },
         { section: 'Service Evaluation', fields: allKeys.filter(key => /^(eval|lastMileEval)/.test(key)).sort(naturalLocalSort) },
         { section: 'Main-Haul Choice Experiment', fields: ['railwayAwareness', 'hillTrainExperience', 'railwaySentiment', 'railGate', 'railNoReason', 'railNoReasonOtherText', 'railStress', 'railCostConcern', 'railFlexibility', 'railAccessibility', 'railCongestion', ...matching(/^main_haul_[A-Za-z]+_Task\d+$/)] },
-        { section: 'Last-Mile Choice Experiment', fields: ['ropewayAwareness', 'ropewayGate', 'ropewayNoReason', 'ropewayNoReasonOtherText', 'ropewayCostPreference', 'ropewaySpiritual', 'ropewaySafety', 'ropewayRecommend', 'ropewaySubsidy', 'wtpRopewayKedarnath', 'ropewayDriver', ...matching(/^last_mile_[A-Za-z]+_Task\d+$/)] },
+        { section: 'Last-Mile Choice Experiment', fields: ['ropewayAwareness', 'ropewayGate', 'ropewayNoReason', 'ropewayNoReasonOtherText', 'ropewayCostPreference', 'ropewaySpiritual', 'ropewaySafety', 'ropewaySubsidy', 'wtpRopewayShrine', 'wtpRopewayKedarnath', 'ropewayDriver', ...matching(/^last_mile_[A-Za-z]+_Task\d+$/)] },
         { section: 'Integrated Services', fields: ['integratedUse', 'integratedPayment', 'guaranteedSeatWtp', 'helicopterReducedCostIntent', 'integratedNoReason', 'integratedTime', 'integratedCost', 'integratedComfort', 'integratedReliability', 'integratedSafety'] },
         { section: 'Priorities And Attitudes', fields: allKeys.filter(key => /^(priority|attitude)|maxAcceptableWait/.test(key)).sort(naturalLocalSort) },
-        { section: 'Feedback', fields: ['insuranceMedicalAwareness', 'challenge', 'feedbackChallenge', 'feedbackSuggestions', 'feedbackOther'] }
+        { section: 'Feedback', fields: ['insuranceMedicalAwareness', 'challenge', 'feedbackChallenge', 'feedbackSuggestions', 'feedbackOther'] },
+        { section: 'Lucky Draw', fields: ['luckyDrawUpi'] }
     ].map(group => ({ ...group, fields: group.fields.filter(field => field === 'responseId' || hasKey(field)) }));
 
     const known = new Set(groups.flatMap(group => group.fields));
@@ -3891,6 +4175,7 @@ function buildLocalDhamVisits(responsesToExport) {
                 previousVisits: getLocalField(response, localPreviousVisitKey(dham)),
                 ongoingTripStatus: getLocalField(response, `ongoingDhamStatus_${slug}`),
                 mainHaulTransfers: getLocalField(response, `mainHaulTransferCount_${slug}`),
+                stayLocation: getLocalField(response, `stayLocation_${slug}`),
                 stayDuration: getLocalField(response, `stayDuration_${slug}`),
                 stayAccommodation: getLocalField(response, `stayAccom_${slug}`),
                 stayAccommodationCost: getLocalField(response, `stayAccomCost_${slug}`),
@@ -3969,6 +4254,13 @@ function buildLocalLastMileTrips(responsesToExport) {
                 responseId,
                 dham,
                 approachMode: getLocalField(response, `lastMileApproachMode_${slug}`),
+                mountainDestination: getLocalField(response, `lastMileApproachDestination_${slug}`),
+                mountainMode: getLocalField(response, `lastMileApproachMountainMode_${slug}`),
+                mountainTimeBand: getLocalField(response, `lastMileApproachMountainTimeBand_${slug}`),
+                mountainTimeHours: getLocalField(response, `lastMileApproachMountainTime_${slug}`),
+                mountainCostBand: getLocalField(response, `lastMileApproachMountainCostBand_${slug}`),
+                mountainCost: getLocalField(response, `lastMileApproachMountainCost_${slug}`),
+                ghangariaStop: getLocalField(response, `lastMileApproachStop_${slug}`),
                 route: getLocalField(response, `lastMileRoute_${slug}`),
                 mode: getLocalField(response, `lastMileMode_${slug}`),
                 timeHours: getLocalField(response, `lastMileTime_${slug}`),
@@ -3976,6 +4268,23 @@ function buildLocalLastMileTrips(responsesToExport) {
                 cost: getLocalField(response, `lastMileCost_${slug}`),
                 costBand: getLocalField(response, `lastMileCostBand_${slug}`),
                 returnType: getLocalField(response, `lastMileReturnType_${slug}`),
+                returnRoute: getLocalField(response, `lastMileReturnRoute_${slug}`),
+                returnHelipad: getLocalField(response, `lastMileReturnHelipad_${slug}`),
+                returnLeg1Route: getLocalField(response, `lastMileReturnLegRoute_${slug}`),
+                returnTimeBand: getLocalField(response, `lastMileReturnTimeBand_${slug}`),
+                returnCostBand: getLocalField(response, `lastMileReturnCostBand_${slug}`),
+                returnLeg2Route: getLocalField(response, `lastMileReturnLegRoute_${slug}_Leg2`),
+                returnLeg2Mode: getLocalField(response, `lastMileReturnMode_${slug}_Leg2`),
+                returnLeg2TimeBand: getLocalField(response, `lastMileReturnTimeBand_${slug}_Leg2`),
+                returnLeg2TimeHours: getLocalField(response, `lastMileReturnTime_${slug}_Leg2`),
+                returnLeg2CostBand: getLocalField(response, `lastMileReturnCostBand_${slug}_Leg2`),
+                returnLeg2Cost: getLocalField(response, `lastMileReturnCost_${slug}_Leg2`),
+                returnLeg3Route: getLocalField(response, `lastMileReturnLegRoute_${slug}_Leg3`),
+                returnLeg3Mode: getLocalField(response, `lastMileReturnMode_${slug}_Leg3`),
+                returnLeg3TimeBand: getLocalField(response, `lastMileReturnTimeBand_${slug}_Leg3`),
+                returnLeg3TimeHours: getLocalField(response, `lastMileReturnTime_${slug}_Leg3`),
+                returnLeg3CostBand: getLocalField(response, `lastMileReturnCostBand_${slug}_Leg3`),
+                returnLeg3Cost: getLocalField(response, `lastMileReturnCost_${slug}_Leg3`),
                 returnMode: getLocalField(response, `lastMileReturnMode_${slug}`),
                 returnTimeHours: getLocalField(response, `lastMileReturnTime_${slug}`),
                 returnCost: getLocalField(response, `lastMileReturnCost_${slug}`)
@@ -4103,16 +4412,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- Assign all DOM elements to global variables ---
     form = document.getElementById("surveyForm");
     tableBody = document.querySelector("#responseTable tbody");
-    const mainHaulPage = document.getElementById('page-2B-journey');
-    const mainHaulEvaluation = document.getElementById('mainHaulEvaluation');
-    const mainHaulNavigation = Array.from(mainHaulPage.children)
-        .find(element => element.classList.contains('nav-buttons'));
-    if (mainHaulEvaluation && mainHaulNavigation) {
-        mainHaulPage.insertBefore(mainHaulEvaluation, mainHaulNavigation);
-    }
     const pageOrder = [
         'page-0-consent',
-        'page-2-B',          // Section A Part 1: group profile + Dham selection
+        'page-2-B',          // Section A Part 1: group profile + Shrine selection
         'page-2B-journey',   // Section A Part 2: main-haul journey
         'page-2C-lastmile',  // Section A Part 3: last-mile journey and stay
         'page-3-C',          // Section B: Main-Haul DCE
@@ -4167,10 +4469,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         updatePrimaryModeRouteCells();
     });
     form.addEventListener('change', event => {
-        if (event.target.matches('select[name^="lastMileCostBand_"]')) updateLastMileCostChoice(event.target.closest('tr'));
+        if (event.target.matches('select[name^="lastMileCostBand_"]')) updateLastMileCostChoice(event.target.closest('[id^="last-mile-row-"]'));
         if (event.target.matches('select[name^="stayAccomCostRange_"]')) updateAccommodationCosts();
         if (event.target.matches('select[name^="lastMileTimeBand_"]')) {
-            updateLastMileTimeChoice(event.target.closest('tr'));
+            updateLastMileTimeChoice(event.target.closest('[id^="last-mile-row-"]'));
         }
         if (event.target.matches('select[name^="restPurpose_"], select[name^="restDurationChoice_"], select[name^="restCostChoice_"]')) {
             updateStopoverChoices(event.target);
@@ -4206,16 +4508,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (event.target.matches('input[type="radio"][name^="primaryTime_"], input[type="radio"][name^="primaryCost_"], input[type="radio"][name^="mainHaulTransferTime_"], input[type="radio"][name^="mainHaulTransferCost_"]')) {
             syncPrimaryRangeSelection(event.target);
         }
-        if (event.target.matches('select[name^="lastMileReturnMode_"]')) {
-            handleLastMileReturnModeChange(event.target);
-        }
-        if (event.target.matches('input[name^="lastMileReturnType_"]')) {
-            updateLastMileReturnDetails(event.target.name.replace('lastMileReturnType_', ''));
-        }
-        if (event.target.matches('select[name^="lastMileReturnTimeBand_"], select[name^="lastMileReturnCostBand_"]')) {
-            const slug = event.target.name.replace(/lastMileReturn(?:TimeBand|CostBand)_/, '');
-            updateLastMileReturnDetails(slug);
-        }
+        const returnCard = event.target.closest('.last-mile-return-card');
+        if (returnCard) updateLastMileReturnDetails(returnCard.id.replace('last-mile-return-', ''));
         if (event.target.matches('input[name="lastMileApproachMode_Kedarnath"], select[name="lastMileApproachWaitingRange_Kedarnath"], select[name="lastMileApproachTimeBand_Kedarnath"]')) {
             updateKedarnathApproachDetails();
         }
@@ -4224,6 +4518,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         if (event.target.matches('input[name="lastMileApproachMode_HemkundSahib"], select[name="lastMileApproachWaitingRange_HemkundSahib"], select[name="lastMileApproachTimeBand_HemkundSahib"]')) {
             updateHemkundTaxiDetails();
+        }
+        if (event.target.closest('#hemkundMountainDetails')) {
+            updateHemkundMountainDetails();
         }
         if (event.target.matches('select[name^="mainHaulTransferCount_"]')) {
             updatePrimaryModeTable();
@@ -4254,7 +4551,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const transferRow = event.target.closest('tr[data-inter-transfer-pair]');
             if (transferRow) updateInterDhamRouteLabel(transferRow.dataset.interTransferPair);
         }
-        if (event.target.matches('#otherStartPoint, input[name^="mainHaulTransferLocation_"], input[name^="mainHaulTransferTime_"], input[name^="mainHaulTransferCost_"], input[name^="interDhamTransferLocation_"], input[name^="interDhamTransferTime_"], input[name^="interDhamTransferCost_"], input[name^="restLocation_"][name$="_otherSpecify"], input[name^="primaryMode_"][name$="_otherSpecify"], input[name^="primaryTime_"], input[name^="primaryCost_"], input[name^="interDhamTime_"], input[name^="interDhamCost_"], input[name="returnRoute[]"], input[name="returnTime[]"], input[name="returnCost[]"], input[name^="lastMileTime_"], input[name^="lastMileCost_"], input[name^="lastMileReturnTime_"], input[name^="lastMileReturnCost_"], input[name^="lastMileApproachTime_"], input[name^="lastMileApproachCost_"], input[name^="lastMileApproachWaitingTime_"], input[name^="kedarnathHelicopter"], input[name="kedarnathHelicopterBoardingPoint_otherSpecify"]')) {
+        if (event.target.matches('#otherStartPoint, input[name^="mainHaulTransferLocation_"], input[name^="mainHaulTransferTime_"], input[name^="mainHaulTransferCost_"], input[name^="interDhamTransferLocation_"], input[name^="interDhamTransferTime_"], input[name^="interDhamTransferCost_"], input[name^="restLocation_"][name$="_otherSpecify"], input[name^="primaryMode_"][name$="_otherSpecify"], input[name^="primaryTime_"], input[name^="primaryCost_"], input[name^="interDhamTime_"], input[name^="interDhamCost_"], input[name="returnRoute[]"], input[name="returnTime[]"], input[name="returnCost[]"], input[name^="lastMileTime_"], input[name^="lastMileCost_"], input[name^="lastMileReturnTime_"], input[name^="lastMileReturnCost_"], input[name^="lastMileApproachTime_"], input[name^="lastMileApproachCost_"], input[name^="lastMileApproachWaitingTime_"], input[name^="lastMileApproachMountain"], input[name^="kedarnathHelicopter"], input[name="kedarnathHelicopterBoardingPoint_otherSpecify"]')) {
             renderJourneyPreviews();
         }
     });
@@ -4273,7 +4570,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // A2 Dham Checkboxes
+    // A2 Shrine Checkboxes
     dhamCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => {
             updatePrimaryModeTable();
