@@ -359,6 +359,11 @@
     gap: 10px;
     margin-top: 0;
 }
+#hemkundMountainDetails .hemkund-choice-group:first-child .answer-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 #hemkundMountainDetails .answer-choice span {
     justify-content: center;
     text-align: center;
