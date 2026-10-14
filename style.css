@@ -147,7 +147,7 @@ table#visitHistoryTable {
 .answer-choice span {
     display: flex;
     align-items: center;
-    min-height: 34px;
+    min-height: 44px;
     padding: 6px 10px;
     border: 1px solid #cbd8d0;
     border-radius: 6px;
@@ -190,8 +190,8 @@ table#visitHistoryTable {
 .compact-choice-buttons span {
     display: inline-flex;
     align-items: center;
-    min-height: 30px;
-    padding: 5px 8px;
+    min-height: 40px;
+    padding: 8px 8px;
     color: var(--brand-dark);
     background: #fff;
     border: 1px solid #b8ced9;
@@ -517,6 +517,8 @@ table#visitHistoryTable {
     gap: 6px;
     font-size: 0.95rem;
     cursor: pointer;
+    min-height: 44px;
+    padding: 4px 0;
 }
 .gate-opt input[type="radio"] { accent-color: var(--brand, #2e7d32); }
 
@@ -567,6 +569,19 @@ table#visitHistoryTable {
 }
 @media (max-width: 580px) {
     .checkbox-option-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+    .priority-rating-options {
+        gap: 4px;
+    }
+    .priority-rating-options .answer-choice > span {
+        font-size: 0.88rem;
+        padding: 4px 2px;
+    }
+    .priority-rating-caption {
+        font-size: 0.6rem;
+        line-height: 1.1;
+    }
 }
 .checkbox-option {
     display: flex;
@@ -692,7 +707,7 @@ table#visitHistoryTable {
     font-size: 0.75rem;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
     .approach-detail-grid { grid-template-columns: 1fr; }
     .return-leg-fields { grid-template-columns: 1fr; }
 }
@@ -1273,7 +1288,7 @@ input[type="checkbox"] {
 
 /* Buttons */
 button {
-    min-height: 40px;
+    min-height: 44px;
     margin: 8px 4px;
     padding: 10px 18px;
     color: #fff;
@@ -1857,9 +1872,9 @@ body > h2 {
     }
 
     .language-toggle {
-        width: 38px;
-        min-width: 38px;
-        min-height: 38px;
+        width: 44px;
+        min-width: 44px;
+        min-height: 44px;
         font-size: 0.88rem;
     }
 
@@ -1951,6 +1966,47 @@ body > h2 {
     #devotionalText {
         font-size: 1.25rem !important;
     }
+
+    /* Fix visitHistoryTable specificity so it scrolls on mobile */
+    #visitHistoryTable {
+        display: block !important;
+        overflow-x: auto;
+    }
+    #visitHistoryTable thead,
+    #visitHistoryTable tbody {
+        min-width: 480px;
+    }
+
+    /* Scroll hint for horizontally-scrollable tables */
+    #primaryModeTable,
+    #lastMileTable,
+    #stayDurationTable,
+    #restLocationTable,
+    .likert-scale,
+    .satisfaction-table,
+    .dce-table {
+        position: relative;
+    }
+    #primaryModeTable::after,
+    #lastMileTable::after,
+    #stayDurationTable::after,
+    #restLocationTable::after,
+    .likert-scale::after,
+    .satisfaction-table::after,
+    .dce-table::after {
+        content: "← scroll →";
+        display: block;
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--muted);
+        padding: 2px 0 4px;
+    }
+
+    /* Compact choice buttons — full touch target on mobile */
+    .compact-choice-buttons span {
+        min-height: 44px;
+        padding: 10px 8px;
+    }
 }
 
 /* ---- DCE Card Layout (v2) ---- */
@@ -1980,7 +2036,8 @@ body > h2 {
     margin-top: 6px;
 }
 .inline-transfer-details input {
-    min-width: 155px;
+    width: 100%;
+    min-width: 0;
     margin-top: 5px;
     padding: 7px 8px;
     font-size: 0.85rem;
