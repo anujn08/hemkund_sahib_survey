@@ -3849,7 +3849,7 @@ function handleFormSubmit() {
     // Submit to Google Apps Script via hidden iframe
     // URL split to avoid plain-text indexing in GitHub search
     const _s = ["https://script.google.com/macros/s/",
-                 "AKfycbxijD34Rct0DvYXIiH3fPQb2boSx6URoPP1Rggzs4kyn0d2rKKKjPscFlOvsrrX5j3G",
+                 "AKfycbymEqiCZku9UAHMYF7cvbNS6KDCyZ5ad3OjoTAgRN_2LiaQ7fXTQuMbIlu6z1gH4AIL",
                  "/exec"].join("");
     const scriptUrl = _s;
     form.action = scriptUrl;
