@@ -1,7 +1,10 @@
 // Give stacked phone/tablet tables the same labels as their desktop headings.
 function labelResponsiveSurveyTables() {
     document.querySelectorAll('#restLocationTable, #lastMileTable, #stayDurationTable').forEach(table => {
-        const headings = Array.from(table.querySelectorAll('thead tr:last-child th')).map(th => th.textContent.trim());
+        const headerCells = table.id === 'stayDurationTable'
+            ? [table.tHead.rows[0].cells[0], ...table.tHead.rows[1].cells, table.tHead.rows[0].cells[2], table.tHead.rows[0].cells[3]]
+            : table.querySelectorAll('thead tr:last-child th');
+        const headings = Array.from(headerCells).map(th => th.textContent.trim());
         table.querySelectorAll('tbody tr').forEach(row => {
             Array.from(row.cells).forEach((cell,index) => {
                 if (headings[index]) cell.dataset.mobileLabel = headings[index];
@@ -11,28 +14,47 @@ function labelResponsiveSurveyTables() {
 }
 
 function enhanceJourneySelectButtons(scope = document) {
-    scope.querySelectorAll('select[name^="primaryTravelStatus_"], select[name^="interDhamTravelStatus_"], select[name^="mainHaulTransferCount_"], select[name^="interDhamTransferCount_"], select[name^="restBookingStatus_"], select[name*="FareBasis_"], select[name^="stayBookingStatus_"], select[name="age"], select[name="gender"]').forEach(select => {
-        let group = select.nextElementSibling;
+    scope.querySelectorAll('select[name^="primaryTravelStatus_"], select[name^="interDhamTravelStatus_"], select[name^="mainHaulTransferCount_"], select[name^="interDhamTransferCount_"], select[name^="restBookingStatus_"], select[name*="FareBasis_"], select[name^="stayBookingStatus_"], select[name="age"], select[name="gender"], select[name="occupation"], select[name="income"], select[name="education"], select[name^="dhamSequence_"], #restLocationTable select, #stayDurationTable select, #lastMileTable select').forEach(select => {
+        let group = Array.from(select.parentElement.children).find(element =>
+            element.classList.contains('journey-select-buttons')
+            && (!element.dataset.selectName || element.dataset.selectName === select.name));
+        const isPhoneStopover = Boolean(select.closest('#restLocationTable, #stayDurationTable, #lastMileTable'));
+        if (isPhoneStopover) {
+            if (!window.matchMedia('(max-width: 600px)').matches) {
+                if (group?.classList.contains('journey-select-buttons')) group.remove();
+                select.classList.remove('journey-button-source');
+                return;
+            }
+            const signature = JSON.stringify(Array.from(select.options, option => [option.value, option.textContent]));
+            if (group?.classList.contains('journey-select-buttons') && group.dataset.options !== signature) {
+                group.remove();
+                group = null;
+            }
+        }
         if (!group?.classList.contains('journey-select-buttons')) {
             group = document.createElement('div');
             group.className = 'compact-choice-buttons journey-select-buttons';
+            group.dataset.selectName = select.name;
             group.setAttribute('role', 'group');
-            group.setAttribute('aria-label', select.name === 'age' ? 'Age group' : select.name === 'gender' ? 'Gender' : select.name.includes('FareBasis_') ? 'What does this fare cover?' : select.name.startsWith('stayBookingStatus_') ? 'Stay booking' : select.name.startsWith('restBookingStatus_') ? 'Stopover arrangements' : select.name.includes('TravelStatus') ? 'Travel status' : 'Vehicle changes on this route');
-            Array.from(select.options).filter(option => option.value && !option.textContent.includes('--Select--')).forEach(option => {
+            if (isPhoneStopover) group.dataset.options = JSON.stringify(Array.from(select.options, option => [option.value, option.textContent]));
+            group.setAttribute('aria-label', ({ occupation: 'Occupation', income: 'Monthly household income', education: 'Highest education level' })[select.name] || (select.name.startsWith('stayAccomCostRange_') ? 'Total accommodation cost' : select.name.startsWith('stayAccom_') ? 'Accommodation type' : '') || (isPhoneStopover ? select.closest('table').querySelectorAll('thead th')[select.closest('td').cellIndex]?.textContent.trim() : '') || (select.name.startsWith('dhamSequence_') ? `Shrine ${select.name.split('_')[1]}` : select.name === 'age' ? 'Age group' : select.name === 'gender' ? 'Gender' : select.name.includes('FareBasis_') ? 'What does this fare cover?' : select.name.startsWith('stayBookingStatus_') ? 'Stay booking' : select.name.startsWith('restBookingStatus_') ? 'Stopover arrangements' : select.name.includes('TravelStatus') ? 'Travel status' : 'Vehicle changes on this route'));
+            Array.from(select.options).filter(option => (option.value || select.name === 'income') && !option.textContent.includes('--Select--')).forEach(option => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.dataset.value = option.value;
                 button.textContent = option.textContent;
                 button.addEventListener('click', () => {
-                    select.value = option.value;
+                    select.value = select.name.startsWith('dhamSequence_') && select.value === option.value ? '' : option.value;
                     select.dispatchEvent(new Event('change', {bubbles: true}));
                     enhanceJourneySelectButtons();
                 });
                 group.appendChild(button);
             });
             select.after(group);
-            select.classList.add('journey-button-source');
         }
+        // Keep the group adjacent even if an Other/specify label was inserted.
+        if (select.nextElementSibling !== group) select.after(group);
+        select.classList.add('journey-button-source');
         group.querySelectorAll('button').forEach(button => {
             button.disabled = select.disabled;
             button.setAttribute('aria-pressed', String(button.dataset.value === select.value));
@@ -366,6 +388,24 @@ function nextPrev(n) {
     // A submitted response is complete; only startNewResponse may leave this page.
     if (currentTab === pages.length - 1) return false;
 
+    // Validate every section before submission.
+    if (n > 0 && currentTab === pages.length - 2) {
+        for (let index = 1; index < pages.length - 1; index++) {
+            const previousDisplay = pages[index].style.display;
+            pages[index].style.display = 'block';
+            const valid = validatePage(index);
+            pages[index].style.display = previousDisplay;
+            if (!valid) {
+                recordPageExit(pages[currentTab].id);
+                currentTab = index;
+                showTab(currentTab);
+                validatePage(index);
+                saveSurveyDraft();
+                return false;
+            }
+        }
+    }
+
     // Validation: Only validate if moving forward (n=1)
     if (n > 0) {
         if (!validatePage(currentTab)) {
@@ -561,8 +601,10 @@ function validatePage(n) {
 
 function updateProgressStep(n) {
     if (!steps) return;
+    const indicator = document.getElementById('progress-indicator');
+    if (indicator) indicator.hidden = n === 0 || n === pages.length - 1;
     steps.forEach((step, index) => {
-        if (index === n) {
+        if (index === n - 1) {
             step.classList.add("active");
         } else {
             step.classList.remove("active");
@@ -1665,10 +1707,24 @@ function isDhamPlannedNext(dham) {
         && document.querySelector(`input[name="ongoingDhamStatus_${getDhamSlug(dham)}"]:checked`)?.value === 'Planned next';
 }
 
+function isDhamVisitUpcoming(dham) {
+    return document.querySelector('input[name="tripStatus"]:checked')?.value === 'Ongoing'
+        && ['Planned next', 'Planned later'].includes(document.querySelector(`input[name="ongoingDhamStatus_${getDhamSlug(dham)}"]:checked`)?.value);
+}
+
+function isDhamTravelStatusKnown(dham) {
+    const tripStatus = document.querySelector('input[name="tripStatus"]:checked')?.value;
+    return tripStatus === 'Completed' || (tripStatus === 'Ongoing' && Boolean(dham)
+        && ['Completed', 'Currently underway'].includes(document.querySelector(`input[name="ongoingDhamStatus_${getDhamSlug(dham)}"]:checked`)?.value));
+}
+
 function updatePlannedPrimaryLeg(row) {
     if (!row) return;
     const status = row.querySelector('select[name^="primaryTravelStatus_"]');
     if (!status) return;
+    const statusKnown = isDhamTravelStatusKnown(row.dataset.dham);
+    status.closest('label').style.display = statusKnown ? 'none' : '';
+    if (statusKnown) status.value = 'Known';
     const pending = status.value === 'Not completed yet / mode not decided';
     row.querySelectorAll('td:not(.journey-card-title):not(.journey-card-route):not(.journey-card-action)').forEach(cell => {
         if (cell.classList.contains('primary-helicopter-details')) {
@@ -2299,7 +2355,7 @@ function createRestLocationRowHTML(index, dham = '') {
         ? ''
         : `<button type="button" class="delete-btn" onclick="deleteRestLocationRow('${rowId}')">Delete</button>`;
     return `
-        <tr id="${rowId}">
+        <tr id="${rowId}" style="--route-header-color:${DHAM_ROUTE_INFO[dham]?.color || '#345b70'}">
             <td>${routeCell}</td>
             <td><select name="restLocation_${index}"${requiredAttr}>${locationOptions}</select></td>
             <td><select name="restPurpose_${index}"${requiredAttr}>${purposeOptions}</select></td>
@@ -2359,6 +2415,7 @@ function updateRestLocationTable() {
         if (Array.from(select.options).some(option => option.value === previous)) select.value = previous;
         updatePlannedStopoverRow(row, dham);
     });
+    enhanceJourneySelectButtons(document.getElementById('restLocationTable'));
 }
 
 function updatePlannedStopoverRow(row, dham) {
@@ -2506,13 +2563,12 @@ function createLastMileRowHTML(dham) {
     if (dham === 'Hemkund Sahib') return createHemkundLeg3HTML(dham, dhamSlug, modeOptions, routeValue);
 
     return `
-        <tr id="last-mile-row-${dhamSlug}" data-dham="${escapeAttribute(dham)}">
+        <tr id="last-mile-row-${dhamSlug}" data-dham="${escapeAttribute(dham)}" style="--route-header-color:${DHAM_ROUTE_INFO[dham]?.color || '#345b70'}">
             <td>${dham}</td>
             <td><span class="last-mile-route-label">${escapeHTML(routeValue)}</span><input type="hidden" name="lastMileRoute_${dhamSlug}" value="${escapeAttribute(routeValue)}"></td>
             <td><select name="lastMileMode_${dhamSlug}" required>${modeOptions}</select></td>
             <td><label><select name="lastMileTimeBand_${dhamSlug}" required><option value="">--Choose a time band--</option>${getLastMileTimeBands(dham).map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')}<option value="exact">Other / exact hours</option></select></label><label hidden>Exact one-way time (hours)<input type="number" name="lastMileTime_${dhamSlug}" min="0" step="any" placeholder="e.g., 4.5" disabled></label></td>
             <td><label><select name="lastMileCostBand_${dhamSlug}" required><option value="">--Choose a cost range--</option>${getLastMileCostBands(dham, '').map(band => `<option value="${escapeAttribute(band)}">${escapeHTML(band)}</option>`).join('')}<option value="exact">Other / exact amount</option></select></label><label hidden>Exact cost per person (₹)<input type="number" name="lastMileCost_${dhamSlug}" min="0" step="any" placeholder="e.g., 2500" disabled></label></td>
-            <td><button type="button" class="delete-btn" onclick="deleteLastMileRow('${dhamSlug}')">Remove</button></td>
         </tr>`;
 }
 
@@ -2534,13 +2590,11 @@ function getLastMileRows() {
     return Array.from(document.querySelectorAll('[id^="last-mile-row-"]'));
 }
 
-// Hide the last-mile table (and its cost note) when every shrine's last mile is entered elsewhere.
+// Hide the last-mile table when every shrine's last mile is entered elsewhere.
 function updateLastMileTableVisibility() {
-    const hasTableRows = !!lastMileTableBody?.querySelector('tr');
+    const hasTableRows = !!lastMileTableBody?.querySelector('tr:not([hidden])');
     const table = document.getElementById('lastMileTable');
-    const note = document.getElementById('lastMileCostNote');
     if (table) table.style.display = hasTableRows ? '' : 'none';
-    if (note) note.style.display = hasTableRows ? '' : 'none';
 }
 
 function getMainHaulHelicopterDhams() {
@@ -2723,13 +2777,13 @@ function createStayDurationRowHTML(dham) {
     const dhamSlug = dham.replace(/\s/g, '');
     const accomOptions = `<option value="">--Select--</option><option>Same day return (no overnight stay)</option><option>Hotel</option><option>Dormitory</option><option>Dharamsala/Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
     return `
-        <tr id="stay-duration-row-${dhamSlug}">
+        <tr id="stay-duration-row-${dhamSlug}" style="--route-header-color:${DHAM_ROUTE_INFO[dham]?.color || '#345b70'}">
             <td>${stayLocation}${dham === 'Hemkund Sahib' ? '<small class="field-helper">Hemkund Sahib overnight base</small>' : ''}<input type="hidden" name="stayLocation_${dhamSlug}" value="${escapeAttribute(stayLocation)}"></td>
-            <td><input type="radio" name="stayDuration_${dhamSlug}" value="<8h" required></td>
-            <td><input type="radio" name="stayDuration_${dhamSlug}" value="8-12h"></td>
-            <td><input type="radio" name="stayDuration_${dhamSlug}" value="12-18h"></td>
-            <td><input type="radio" name="stayDuration_${dhamSlug}" value="18-24h"></td>
-            <td><input type="radio" name="stayDuration_${dhamSlug}" value=">24h"></td>
+            <td><label class="stay-duration-button"><input type="radio" name="stayDuration_${dhamSlug}" value="<8h" required><span>Under 8 hrs</span></label></td>
+            <td><label class="stay-duration-button"><input type="radio" name="stayDuration_${dhamSlug}" value="8-12h"><span>8&ndash;12 hrs</span></label></td>
+            <td><label class="stay-duration-button"><input type="radio" name="stayDuration_${dhamSlug}" value="12-18h"><span>12&ndash;18 hrs</span></label></td>
+            <td><label class="stay-duration-button"><input type="radio" name="stayDuration_${dhamSlug}" value="18-24h"><span>18&ndash;24 hrs</span></label></td>
+            <td><label class="stay-duration-button"><input type="radio" name="stayDuration_${dhamSlug}" value=">24h"><span>Over 24 hrs</span></label></td>
             <td><select name="stayAccom_${dhamSlug}" required>${accomOptions}</select></td>
             <td><label><span class="accommodation-cost-label"></span><select name="stayAccomCostRange_${dhamSlug}" required><option value="">--Choose a range--</option><option>No cost (₹0)</option><option>₹1–₹500</option><option>₹501–₹1,000</option><option>₹1,001–₹2,000</option><option>₹2,001–₹5,000</option><option>₹5,001–₹10,000</option><option>₹10,001–₹20,000</option><option>Over ₹20,000</option><option value="exact">Other / exact amount</option></select></label><label hidden>Exact total cost (₹)<input type="number" name="stayAccomCost_${dhamSlug}" min="0" step="any" placeholder="e.g., 1500" disabled></label><input type="hidden" name="stayAccomCostBasis_${dhamSlug}" value=""></td>
         </tr>`;
@@ -2794,9 +2848,31 @@ function updateLastMileTable() {
     });
     updateKedarnathAccessUI();
     updateHemkundTaxiDetails();
+    // Upcoming shrines have no actual last-mile journey to report yet.
+    lastMileDhams.forEach(dham => {
+        const row = document.getElementById(`last-mile-row-${getDhamSlug(dham)}`);
+        if (!row) return;
+        const upcoming = isDhamVisitUpcoming(dham);
+        row.hidden = upcoming;
+        row.querySelectorAll('input, select, textarea, button').forEach(control => {
+            if (upcoming) {
+                if (!control.dataset.upcomingLastMileState) {
+                    control.dataset.upcomingLastMileState = JSON.stringify({ disabled: control.disabled, required: control.required });
+                }
+                control.disabled = true;
+                control.required = false;
+            } else if (control.dataset.upcomingLastMileState) {
+                const previous = JSON.parse(control.dataset.upcomingLastMileState);
+                control.disabled = previous.disabled;
+                control.required = previous.required;
+                delete control.dataset.upcomingLastMileState;
+            }
+        });
+    });
     updateLastMileTableVisibility();
-    updateLastMileReturnSection(lastMileDhams);
+    updateLastMileReturnSection(lastMileDhams.filter(dham => !isDhamVisitUpcoming(dham)));
     updateAccommodationCosts();
+    enhanceJourneySelectButtons(document.getElementById('lastMileTable'));
 }
 
 function getLastMileReturnModeOptionsHTML(dham) {
@@ -2908,6 +2984,7 @@ function createLastMileReturnCardHTML(dham) {
 }
 
 function updateLastMileReturnSection(visitedDhams = getVisitedDhams()) {
+    visitedDhams = visitedDhams.filter(dham => !isDhamVisitUpcoming(dham));
     const container = document.getElementById('lastMileReturnSection');
     if (!container) return;
     container.querySelectorAll('.last-mile-return-card').forEach(card => {
@@ -3292,12 +3369,12 @@ function updateDhamSequenceDropdowns() {
         return;
     }
     
-    let html = '<h4>Order of Shrine Visits</h4><p class="field-helper">Choose your first stop, then your next stops in order.</p><div class="dham-sequence-grid">';
+    let html = '<h4>Order of Shrine Visits</h4><p class="field-helper">Select your first shrine, then your next shrines in order. Tap a selected shrine again to clear the selection.</p><div class="dham-sequence-grid">';
 
     for (let i = 0; i < visitedDhams.length; i++) {
         const selectedDham = previousSelections[i] || '';
         html += `
-            <label><span class="visit-number">${i + 1}</span> ${i === 0 ? 'First stop' : 'Next stop'}
+            <label><span class="visit-number">${i + 1}</span> ${i === 0 ? 'First shrine' : 'Next shrine'}
                 <select name="dhamSequence_${i + 1}" data-selected-dham="${escapeAttribute(selectedDham)}" required>
                 </select>
             </label>`;
@@ -3330,6 +3407,9 @@ function refreshDhamSequenceOptions() {
         select.dataset.selectedDham = currentValue;
     });
     lockEnglishOptionValues(document.getElementById('dhamSequenceSelection'));
+    // Rebuild the buttons because choosing a shrine changes the available shrines.
+    selects.forEach(select => select.nextElementSibling?.classList.contains('journey-select-buttons') && select.nextElementSibling.remove());
+    enhanceJourneySelectButtons(document.getElementById('dhamSequenceSelection'));
 }
 
 function handleBudgetScopeChange() {
@@ -3474,6 +3554,30 @@ function validateGroupComposition() {
     }
 
     return isValid;
+}
+
+function initializeClearableVisitHistory() {
+    const table = document.getElementById('visitHistoryTable');
+    let selectedBeforeActivation = null;
+    const rememberSelection = event => {
+        if (event.target.matches('input[type="radio"]')) {
+            selectedBeforeActivation = event.target.checked ? event.target : null;
+        }
+    };
+    table.addEventListener('pointerdown', rememberSelection);
+    table.addEventListener('keydown', event => {
+        if (event.key === ' ') rememberSelection(event);
+    });
+    table.addEventListener('click', event => {
+        const radio = event.target;
+        if (!radio.matches('input[type="radio"]')) return;
+        if (radio === selectedBeforeActivation) {
+            radio.checked = false;
+            radio.dispatchEvent(new Event('input', { bubbles: true }));
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        selectedBeforeActivation = null;
+    });
 }
 
 function updateRepeatVisitReasonVisibility() {
@@ -4006,6 +4110,7 @@ function updateInterDhamTable() {
         const toDhamColor = toDhamInfo.color || '';
         const tr = document.createElement('tr');
         tr.dataset.interPair = pairKey;
+        tr.dataset.destinationDham = pair.to;
         if (toDhamColor) tr.style.cssText = `--dham-clr:${toDhamColor}`;
         const toDhamIcon = toDhamInfo.icon || '🗺️';
         tr.innerHTML = `
@@ -4021,7 +4126,6 @@ function updateInterDhamTable() {
                   </select>
                 </label>
                 <input type="radio" name="interDhamMode_${pairKey}" value="Not completed yet / mode not decided" hidden${modeVal === 'Not completed yet / mode not decided' ? ' checked' : ''}>
-                <button type="button" class="copy-leg-settings" onclick="copyPreviousLegSettings(this)">Use the same vehicle type and fare details as the previous route</button>
             </td>
             <td data-label="Vehicle changes on this route">
               <select name="interDhamTransferCount_${pairKey}" required>${getMainHaulTransferOptionsHTML(transferVal)}</select>
@@ -4046,6 +4150,16 @@ function updateInterDhamTable() {
 // An undecided future leg must not collect guessed travel details.
 function updatePendingInterDhamLeg(row) {
     if (!row?.dataset.interPair) return;
+    const status = row.querySelector('select[name^="interDhamTravelStatus_"]');
+    const statusKnown = isDhamTravelStatusKnown(row.dataset.destinationDham);
+    if (status) {
+        status.closest('label').style.display = statusKnown ? 'none' : '';
+        if (statusKnown) {
+            status.value = 'Known';
+            const pendingMode = row.querySelector('input[name^="interDhamMode_"][value="Not completed yet / mode not decided"]');
+            if (pendingMode) pendingMode.checked = false;
+        }
+    }
     const pending = row.querySelector('input[name^="interDhamMode_"]:checked')?.value === 'Not completed yet / mode not decided';
     row.querySelectorAll('td').forEach(cell => {
         if (cell.classList.contains('journey-card-title') || cell.classList.contains('journey-card-route')) return;
@@ -4069,37 +4183,7 @@ function updatePendingInterDhamLeg(row) {
     document.querySelectorAll('#interDhamTable tr[data-inter-transfer-pair]').forEach(transferRow => {
         if (transferRow.dataset.interTransferPair === row.dataset.interPair && pending) transferRow.remove();
     });
-    const copyButton = row.querySelector('.copy-leg-settings');
-    if (copyButton) copyButton.hidden = pending;
     if (pending) updateInterDhamRouteLabel(row.dataset.interPair);
-}
-
-function copyPreviousLegSettings(button) {
-    const currentRow = button.closest('tr');
-    if (!currentRow) return;
-
-    const mainRows = Array.from(document.querySelectorAll('#interDhamTable tbody tr[data-inter-pair]'));
-    const currentIndex = mainRows.indexOf(currentRow);
-    const previousRow = currentIndex > 0 ? mainRows[currentIndex - 1] : null;
-    const sourceMode = previousRow
-        ? previousRow.querySelector('input[name^="interDhamMode_"]:checked')
-        : document.querySelector('#primaryModeTable input[name^="primaryMode_"]:checked');
-    const sourceFareBasis = previousRow
-        ? previousRow.querySelector('select[name^="interDhamFareBasis_"]')
-        : document.querySelector('#primaryModeTable select[name^="primaryFareBasis_"]');
-    const targetMode = sourceMode?.value
-        ? currentRow.querySelector(`input[name^="interDhamMode_"][value="${CSS.escape(sourceMode.value)}"]`)
-        : null;
-    const targetFareBasis = currentRow.querySelector('select[name^="interDhamFareBasis_"]');
-
-    if (targetMode) {
-        targetMode.checked = true;
-        const status = currentRow.querySelector('select[name^="interDhamTravelStatus_"]');
-        if (status) status.value = targetMode.value === 'Not completed yet / mode not decided' ? targetMode.value : 'Known';
-        updatePendingInterDhamLeg(currentRow);
-    }
-    if (sourceFareBasis?.value && targetFareBasis) targetFareBasis.value = sourceFareBasis.value;
-    renderJourneyPreviews();
 }
 
 // Preserve the displayed range alongside numeric category codes for analysis.
@@ -4708,8 +4792,10 @@ function initGeolocation() {
  * It also attaches all the necessary event listeners.
  */
 document.addEventListener("DOMContentLoaded", async () => {
+    window.matchMedia('(max-width: 600px)').addEventListener('change', () => enhanceJourneySelectButtons());
     // --- Assign all DOM elements to global variables ---
     form = document.getElementById("surveyForm");
+    initializeClearableVisitHistory();
     tableBody = document.querySelector("#responseTable tbody");
     const pageOrder = [
         'page-0-consent',
@@ -4799,6 +4885,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             updateLastMileTable();
         }
         if (event.target.matches('input[name^="ongoingDhamStatus_"], input[name="tripStatus"]')) {
+            updateLastMileTable();
             updateRestLocationTable();
             updateAccommodationCosts();
             const first = getOrderedDhams()[0];

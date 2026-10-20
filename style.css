@@ -87,9 +87,19 @@ table#visitHistoryTable {
 }
 #dhamSequenceSelection .dham-sequence-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    grid-template-columns: 1fr;
     gap: 8px;
     margin: 8px 0 16px;
+}
+#dhamSequenceSelection .journey-select-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+#dhamSequenceSelection .journey-select-buttons button {
+    min-height: 44px;
+    padding: 8px 14px;
 }
 #dhamSequenceSelection .dham-sequence-grid label {
     min-width: 0;
@@ -420,6 +430,28 @@ table#visitHistoryTable {
 .approach-detail-grid label {
     margin: 0;
     font-size: 0.88rem;
+    font-weight: 700;
+}
+
+#kedarnathShuttleDetails .approach-cost-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+#kedarnathShuttleDetails select,
+#kedarnathShuttleDetails .approach-fixed-cost {
+    box-sizing: border-box;
+    height: 48px;
+    min-height: 48px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 1rem;
+}
+#kedarnathShuttleDetails .approach-fixed-cost {
+    display: flex;
+    align-items: center;
+    background: #f0f4f2;
+    border: 1px solid #cbd8d0;
     font-weight: 700;
 }
 
@@ -2014,7 +2046,41 @@ body > h2 {
 .dce-task { margin-bottom: 28px; }
 .dce-task-header { background:#e6f0fa; padding:10px 14px; font-weight:bold; font-size:0.98em; border-radius:6px 6px 0 0; border:1px solid #c0d8f0; }
 .dce-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:0; }
-@media(max-width:640px){ .dce-cards{ grid-template-columns:1fr; } }
+@media (max-width: 640px) {
+    .dce-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+    .dce-cards .dce-card { min-width: 0; }
+    .dce-cards .dce-card-header {
+        padding: 8px 4px;
+        min-height: 60px;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+    }
+    .dce-cards .dce-attr {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 5px;
+        gap: 4px;
+    }
+    .dce-cards .dce-label { white-space: normal; overflow-wrap: anywhere; }
+    .dce-cards .dce-value { text-align: left; overflow-wrap: anywhere; }
+    .dce-cards .dce-select-row { padding: 10px 4px; overflow-wrap: anywhere; }
+    .dce-cards .dce-select-label {
+        flex-direction: column;
+        justify-content: center;
+        min-height: 44px;
+    }
+    /* Share attribute row heights so corresponding values line up across options. */
+    @supports (grid-template-rows: subgrid) {
+        .dce-cards .dce-card {
+            display: grid;
+            grid-template-rows: subgrid;
+            grid-row: span 6;
+            row-gap: 0;
+        }
+        .dce-cards .dce-card:has(.dce-attr:nth-child(6)) { grid-row: span 7; }
+        .dce-cards .dce-select-row { margin-top: 0; }
+    }
+}
 .dce-card { border:2px solid #ddd; border-radius:0 0 8px 8px; display:flex; flex-direction:column; background:#fff; transition:border-color 0.2s; }
 .dce-card.selected-card { border-color:var(--brand); border-width:3px; }
 .dce-card-header { background:var(--brand); color:#fff; padding:8px 12px; font-weight:bold; font-size:0.9em; text-align:center; }
@@ -2195,14 +2261,7 @@ table.journey-card-table {
     border-radius: 6px;
     font-weight: 700;
 }
-.journey-card-table .copy-leg-settings {
-    float: right;
-    min-height: 30px;
-    margin: -4px 0 -4px 10px;
-    padding: 5px 9px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
+
 .journey-card-table input,
 .journey-card-table select {
     margin-top: 0;
@@ -2225,9 +2284,7 @@ table.journey-card-table {
 
 /* Live pictorial route preview. */
 .journey-visual {
-    position: sticky;
-    top: 8px;
-    z-index: 30;
+    position: static;
     margin: 14px 0 20px;
     padding: 14px;
     max-height: 220px;
@@ -2860,19 +2917,6 @@ table.journey-card-table {
     #surveyForm .answer-choice input[type="radio"],
     #surveyForm .compact-choice-buttons input[type="radio"] { min-width: 1px; min-height: 1px; }
     #surveyForm #originStateMatches button { min-height: 44px; }
-    /* Convert entry tables into labelled cards instead of wide input grids. */
-    #restLocationTable, #lastMileTable, #stayDurationTable { display: block; width: 100%; overflow: visible; }
-    #restLocationTable thead, #lastMileTable thead, #stayDurationTable thead { display: none; }
-    #restLocationTable tbody, #lastMileTable tbody, #stayDurationTable tbody { display: grid; gap: 12px; min-width: 0; width: 100%; }
-    #restLocationTable tbody tr, #lastMileTable tbody tr, #stayDurationTable tbody tr {
-        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
-        padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
-    }
-    #restLocationTable td, #lastMileTable td, #stayDurationTable td { display: block; min-width: 0; padding: 0; border: 0; overflow-wrap: anywhere; text-align: left; }
-    #restLocationTable td::before, #lastMileTable td::before, #stayDurationTable td::before { content: attr(data-mobile-label); display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 5px; }
-    #restLocationTable td:first-child, #lastMileTable td:first-child, #stayDurationTable td:first-child { grid-column: 1 / -1; font-weight: 700; }
-    #stayDurationTable td:nth-last-child(-n+2) { grid-column: 1 / -1; }
-    #restLocationTable::after, #lastMileTable::after, #stayDurationTable::after { content: none; }
     .journey-card-table tbody tr { grid-template-columns: 1fr; }
     .journey-card-table tbody td { grid-column: 1 / -1; }
 }
@@ -2883,7 +2927,6 @@ table.journey-card-table {
     #page-0-consent .consent-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #page-0-consent .consent-facts { grid-template-columns: auto auto minmax(0, 1fr); }
     #page-0-consent .consent-facts span { font-size: 0.6rem; }
-    #restLocationTable tbody tr, #lastMileTable tbody tr { grid-template-columns: 1fr; }
     #progress-indicator { gap: 4px; max-width: 100%; }
     .step { flex-shrink: 1; }
     #surveyForm .nav-buttons { gap: 8px; }
@@ -2917,10 +2960,28 @@ table.journey-card-table {
     box-sizing: border-box;
     overflow: hidden;
 }
-.survey-table-scroll #visitHistoryTable { min-width: 480px; table-layout: fixed; }
+.survey-table-scroll #visitHistoryTable { min-width: 0; table-layout: fixed; }
 .survey-table-scroll #responseTable { min-width: 640px; }
 .survey-table-scroll #visitHistoryTable thead,
 .survey-table-scroll #visitHistoryTable tbody { min-width: 0; }
+
+@media (max-width: 600px) {
+    .survey-table-scroll #visitHistoryTable th,
+    .survey-table-scroll #visitHistoryTable td {
+        padding: 8px 2px;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+    .survey-table-scroll #visitHistoryTable th { hyphens: auto; }
+    .survey-table-scroll #visitHistoryTable td { height: 44px; box-sizing: border-box; }
+    .survey-table-scroll #visitHistoryTable input[type="radio"],
+    .survey-table-scroll #visitHistoryTable input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        margin: 0;
+    }
+}
 
 .lucky-draw-option {
     margin: 24px 0;
@@ -2931,3 +2992,373 @@ table.journey-card-table {
 }
 .lucky-draw-option h3 { margin-top: 0; }
 .lucky-draw-option input { width: 100%; box-sizing: border-box; }
+
+/* Keep entry tables in the same grid on desktop, tablet and phone. */
+.survey-table-scroll.entry-table-scroll table {
+    display: table;
+    width: 100%;
+    min-width: 900px;
+    max-width: none;
+    overflow: visible;
+}
+.survey-table-scroll.entry-table-scroll thead,
+.survey-table-scroll.entry-table-scroll tbody { min-width: 0; }
+.survey-table-scroll.entry-table-scroll table::after { content: none; }
+.entry-table-scroll { margin-bottom: 16px; }
+#lastMileTable tr[hidden] { display: none !important; }
+#surveyForm input, #surveyForm select, #surveyForm textarea,
+#surveyForm button, #surveyForm .form-page { scroll-margin-top: 100px; }
+#progress-indicator[hidden] { display: none; }
+
+
+@media (min-width: 1025px) {
+    #surveyForm input, #surveyForm select, #surveyForm textarea,
+    #surveyForm button, #surveyForm .form-page { scroll-margin-top: 150px; }
+}
+/* Stack travel and stopover fields on phones without sideways scrolling. */
+@media (max-width: 600px) {
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) thead { display: none; }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) tbody {
+        display: grid;
+        gap: 14px;
+        width: 100%;
+        min-width: 0;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        text-align: left;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td::before {
+        content: attr(data-mobile-label);
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--brand-dark);
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td:first-child {
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 700;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td:first-child::before,
+    #surveyForm #restLocationTable td:last-child::before,
+    #surveyForm #restLocationTable td:last-child:empty { display: none; }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) select,
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) input {
+        width: 100%;
+        min-width: 0;
+        margin-top: 0;
+        min-height: 44px;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td[hidden] { display: none !important; }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) tr[hidden] { display: none !important; }
+}
+@media (max-width: 600px) {
+    #surveyForm #restLocationTable .journey-select-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+    #surveyForm #restLocationTable .journey-select-buttons button {
+        flex: 1 1 110px;
+        min-width: 0;
+        min-height: 44px;
+        margin: 0;
+        padding: 8px 10px;
+        white-space: normal;
+        text-align: center;
+    }
+}
+/* Shrine colors make stopover routes easy to distinguish. */
+#surveyForm #restLocationTable tbody td:first-child {
+    background: var(--route-header-color, #345b70);
+    color: #fff;
+    font-weight: 700;
+}
+@media (max-width: 600px) {
+    #surveyForm #restLocationTable tbody td:first-child {
+        padding: 12px 14px;
+        border: 0;
+        border-radius: 7px;
+    }
+}
+@media (max-width: 600px) {
+    #surveyForm #lastMileTable tbody td:first-child {
+        background: var(--route-header-color, #345b70);
+        color: #fff;
+        padding: 12px 14px;
+        border: 0;
+        border-radius: 7px;
+    }
+}
+/* Keep all last-mile columns visible together on tablets. */
+@media (min-width: 601px) and (max-width: 1200px) {
+    #surveyForm #lastMileTable {
+        display: table;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        table-layout: fixed;
+        box-sizing: border-box;
+    }
+    #surveyForm #lastMileTable th,
+    #surveyForm #lastMileTable td {
+        padding: 8px 5px;
+        overflow-wrap: anywhere;
+        font-size: 0.88rem;
+    }
+    #surveyForm #lastMileTable th:first-child { width: 15%; }
+    #surveyForm #lastMileTable th:nth-child(2) { width: 23%; }
+    #surveyForm #lastMileTable th:nth-child(3) { width: 24%; }
+    #surveyForm #lastMileTable th:nth-child(4),
+    #surveyForm #lastMileTable th:nth-child(5) { width: 19%; }
+    #surveyForm #lastMileTable label { min-width: 0; max-width: 100%; }
+    #surveyForm #lastMileTable select,
+    #surveyForm #lastMileTable input {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px 4px;
+        box-sizing: border-box;
+    }
+}
+/* Fit the accommodation matrix to tablet widths without sideways scrolling. */
+@media (min-width: 601px) and (max-width: 1200px) {
+    #surveyForm #stayDurationTable {
+        display: table;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        table-layout: fixed;
+        box-sizing: border-box;
+    }
+    #surveyForm #stayDurationTable th,
+    #surveyForm #stayDurationTable td {
+        padding: 8px 3px;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+        font-size: 0.88rem;
+    }
+    #surveyForm #stayDurationTable .stay-shrine-column { width: 16%; }
+    #surveyForm #stayDurationTable .stay-time-column { width: 7%; }
+    #surveyForm #stayDurationTable .stay-type-column { width: 23%; }
+    #surveyForm #stayDurationTable .stay-cost-column { width: 26%; }
+    #surveyForm #stayDurationTable label { min-width: 0; max-width: 100%; }
+    #surveyForm #stayDurationTable select,
+    #surveyForm #stayDurationTable input:not([type="radio"]) {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px 4px;
+        box-sizing: border-box;
+    }
+    #surveyForm #stayDurationTable input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        margin: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    #surveyForm #stayDurationTable tbody td:first-child {
+        background: var(--route-header-color, #345b70);
+        color: #fff;
+        padding: 12px 14px;
+        border: 0;
+        border-radius: 7px;
+    }
+    #surveyForm #stayDurationTable td:first-child .field-helper { color: #fff; }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 44px;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #f7fafc;
+    }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6)::before { margin: 0; }
+    #surveyForm #stayDurationTable input[type="radio"] {
+        flex: 0 0 22px;
+        width: 22px;
+        height: 22px;
+        min-height: 22px;
+        min-width: 22px;
+        margin: 0;
+    }
+}
+.stay-duration-button > span { display: none; }
+@media (max-width: 600px) {
+    #surveyForm #stayDurationTable .journey-select-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+    #surveyForm #stayDurationTable .journey-select-buttons button {
+        flex: 1 1 110px;
+        min-width: 0;
+        min-height: 44px;
+        margin: 0;
+        padding: 8px 10px;
+        white-space: normal;
+        text-align: center;
+    }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6) {
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6)::before { display: none; }
+    #surveyForm #stayDurationTable .stay-duration-button {
+        position: relative;
+        display: block;
+        width: 100%;
+        margin: 0;
+        cursor: pointer;
+    }
+    #surveyForm #stayDurationTable .stay-duration-button input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+        min-width: 1px;
+        min-height: 1px;
+    }
+    #surveyForm #stayDurationTable .stay-duration-button > span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 10px;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #f7fafc;
+        color: var(--ink);
+        font-size: 0.9rem;
+    }
+    #surveyForm #stayDurationTable .stay-duration-button input:checked + span {
+        background: var(--brand-dark);
+        color: #fff;
+        border-color: var(--brand-dark);
+        font-weight: 700;
+    }
+    #surveyForm #stayDurationTable .stay-duration-button input:focus-visible + span {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+@media (max-width: 600px) {
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6):nth-child(2) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6):nth-child(2)::before {
+        content: "Shrine stay duration";
+        display: block;
+        color: var(--brand-dark);
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+}
+/* Keep duration choices together in a compact phone layout. */
+@media (max-width: 600px) {
+    #surveyForm #stayDurationTable tbody tr {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    #surveyForm #stayDurationTable td:first-child,
+    #surveyForm #stayDurationTable td:nth-child(7),
+    #surveyForm #stayDurationTable td:nth-child(8) { grid-column: 1 / -1; }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6),
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6):nth-child(2) {
+        display: contents;
+    }
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6):nth-child(2)::before {
+        grid-column: 1 / -1;
+        margin: 4px 0 0;
+    }
+    #surveyForm #stayDurationTable td:nth-child(6) .stay-duration-button { grid-column: 1 / -1; }
+    #surveyForm #stayDurationTable .stay-duration-button { min-width: 0; }
+    #surveyForm #stayDurationTable .stay-duration-button > span {
+        height: 100%;
+        min-height: 48px;
+        text-align: center;
+        line-height: 1.3;
+    }
+    #surveyForm #stayDurationTable td:nth-child(7),
+    #surveyForm #stayDurationTable td:nth-child(8) { margin-top: 8px; }
+}
+/* Button alternatives belong only to the phone layouts for these tables. */
+@media (min-width: 601px) {
+    #surveyForm :is(#restLocationTable, #stayDurationTable, #lastMileTable) .journey-select-buttons {
+        display: none !important;
+    }
+}
+
+@media (max-width: 600px) {
+    #surveyForm #lastMileTable .journey-select-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+    #surveyForm #lastMileTable .journey-select-buttons button {
+        flex: 1 1 110px;
+        min-width: 0;
+        min-height: 44px;
+        margin: 0;
+        padding: 8px 10px;
+        white-space: normal;
+        text-align: center;
+    }
+}
+/* Match phone cards and field groups to each shrine's header color. */
+@media (max-width: 600px) {
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) tbody tr {
+        border-color: var(--route-header-color, #345b70);
+        border-left: 5px solid var(--route-header-color, #345b70);
+        background: #f7f9fb;
+        background: color-mix(in srgb, var(--route-header-color, #345b70) 8%, white);
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) tbody td:not(:first-child) {
+        background: transparent;
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) td::before {
+        color: var(--route-header-color, #345b70);
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) .journey-select-buttons button {
+        border-color: color-mix(in srgb, var(--route-header-color, #345b70) 35%, white);
+    }
+    #surveyForm :is(#restLocationTable, #lastMileTable, #stayDurationTable) .journey-select-buttons button[aria-pressed="true"],
+    #surveyForm #stayDurationTable .stay-duration-button input:checked + span {
+        background: var(--route-header-color, #345b70);
+        border-color: var(--route-header-color, #345b70);
+        color: #fff;
+    }
+}
