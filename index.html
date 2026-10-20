@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pilgrimage Travel Survey</title>
 
-  <link rel="stylesheet" href="style.css?v=20261020-table-width-1">
+  <link rel="stylesheet" href="style.css?v=20261020-instructions-2">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
@@ -63,7 +63,7 @@
   </div>
 
   <form id="surveyForm">
-  <input type="hidden" name="surveySchemaVersion" value="2026-10-20.1">
+  <input type="hidden" name="surveySchemaVersion" value="2026-10-20.2">
   <input type="hidden" name="choiceDesignVersion" value="sha256:a465529be8ce34ed">
   <input type="hidden" name="choiceBlock" id="choiceBlock">
   <input type="hidden" name="surveyStartTimestamp" id="surveyStartTimestamp">
@@ -96,6 +96,32 @@
                 <div><span class="consent-icon">&#127963;&#65039;</span><p>Help plan <b>safer, cheaper and more comfortable</b> yatras in future</p></div>
             </div>
 
+
+
+            <h3 class="consent-subhead">What's inside</h3>
+            <ol class="consent-steps">
+                <li><span class="consent-icon">&#128100;</span><b>About you</b><small>age, group, home state</small></li>
+                <li><span class="consent-icon">&#129517;</span><b>Your journey</b><small>route, modes, time, cost, stay</small></li>
+                <li><span class="consent-icon">&#9878;&#65039;</span><b>Pick your option</b><small>choose between travel options</small></li>
+                <li><span class="consent-icon">&#128172;</span><b>Your views</b><small>priorities and suggestions</small></li>
+            </ol>
+
+            <div class="consent-facts">
+                <span>&#9201;&#65039; <b>5&ndash;8 min</b></span>
+                <span>&#128587; Voluntary</span>
+                <span>&#128274; <strong>Academic research only</strong></span>
+            </div>
+
+            <p>By clicking "I Accept and Agree" you consent to take part.</p>
+            <div class="consent-contact">
+                <h3>Queries or Feedback</h3>
+                <p><b>Anuj Nautiyal</b><br>
+                PhD Scholar, Indian Institute of Technology Roorkee, Uttarakhand<br>
+                Contact: +918192832623<br>
+                Email: anuj_n@ce.iitr.ac.in</p>
+            </div>
+        </div>
+        <section class="survey-instructions" aria-label="Survey instructions">
             <details class="survey-help">
                 <summary>How to fill this survey</summary>
                 <p>Tap an answer to select it. For questions that say &ldquo;select all that apply&rdquo;, you can choose more than one answer.</p>
@@ -121,30 +147,8 @@
                 <p class="field-helper">There are 9 question pages after the introduction. Pages or questions that do not apply may be empty; use Next to continue.</p>
                 <p class="field-helper">If an answer is missing, it is marked red. Complete it correctly and it turns green. On a small screen, swipe sideways inside wide rating tables to see all options.</p>
             </details>
+        </section>
 
-            <h3 class="consent-subhead">What's inside</h3>
-            <ol class="consent-steps">
-                <li><span class="consent-icon">&#128100;</span><b>About you</b><small>age, group, home state</small></li>
-                <li><span class="consent-icon">&#129517;</span><b>Your journey</b><small>route, modes, time, cost, stay</small></li>
-                <li><span class="consent-icon">&#9878;&#65039;</span><b>Pick your option</b><small>choose between travel options</small></li>
-                <li><span class="consent-icon">&#128172;</span><b>Your views</b><small>priorities and suggestions</small></li>
-            </ol>
-
-            <div class="consent-facts">
-                <span>&#9201;&#65039; <b>5&ndash;8 min</b></span>
-                <span>&#128587; Voluntary</span>
-                <span>&#128274; <strong>Academic research only</strong></span>
-            </div>
-
-            <p>By clicking "I Accept and Agree" you consent to take part.</p>
-            <div class="consent-contact">
-                <h3>Queries or Feedback</h3>
-                <p><b>Anuj Nautiyal</b><br>
-                PhD Scholar, Indian Institute of Technology Roorkee, Uttarakhand<br>
-                Contact: +918192832623<br>
-                Email: anuj_n@ce.iitr.ac.in</p>
-            </div>
-        </div>
         <button type="button" id="consent-btn" onclick="nextPrev(1)">I Accept and Agree</button>
     </div>
 
@@ -1663,6 +1667,14 @@
       <textarea name="feedbackOther" rows="3"></textarea>
     </label>
 
+    <section class="lucky-draw-option" aria-labelledby="luckyDrawTitle">
+      <h3 id="luckyDrawTitle">Lucky draw (optional)</h3>
+      <p id="luckyDrawHelp">To opt in to the lucky draw, enter your GPay mobile number or UPI ID below. Leave this blank if you do not wish to enter; you can still submit the survey.</p>
+      <label for="luckyDrawUpi">GPay mobile number or UPI ID (optional)</label>
+      <input type="text" name="luckyDrawUpi" id="luckyDrawUpi" maxlength="100" placeholder="e.g., 9876543210 or yourname@okaxis" aria-describedby="luckyDrawHelp luckyDrawPrivacy" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="field-helper" id="luckyDrawPrivacy">By providing this detail, you agree to its use for administering the lucky draw. Never enter a UPI PIN, OTP or bank account details. Entry does not guarantee a prize.</p>
+    </section>
+
     <div class="nav-buttons">
       <div style="float:left;">
         <button type="button" onclick="nextPrev(-1)">Previous</button>
@@ -1713,7 +1725,7 @@
   <button id="exportCSV">Export CSV</button>
   <button id="exportXLSX">Export Excel</button>
 
-  <script src="script.js?v=20261020-table-width-1"></script>
+  <script src="script.js?v=20261020-lucky-draw-1"></script>
 
 </body>
 </html>

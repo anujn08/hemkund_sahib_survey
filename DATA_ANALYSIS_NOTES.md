@@ -54,7 +54,7 @@ All of these use **1 = strongly disagree, 2 = disagree, 3 = neutral, 4 = agree, 
 | `ropewayEffortPreference` | I would pay more for a journey that needs less physical effort. |
 | `ropewayWalkingCostPreference` | I would walk to the shrine if it helped me save money. |
 
-`railComfortPreference`, `railReliabilityPreference`, `ropewaySafety`, `ropewaySubsidy`, `ropewayWalkingPreference`, `priorityAccessibility` and `luckyDrawUpi` are removed/legacy questions. Some legacy columns remain in structured exports or old raw data. Do not relabel them as the new questions or pool old/new responses without reviewing the questionnaire version. Some existing statements were also reworded during development before version tracking was added.
+`railComfortPreference`, `railReliabilityPreference`, `ropewaySafety`, `ropewaySubsidy`, `ropewayWalkingPreference`, `priorityAccessibility` are removed/legacy questions. Some legacy columns remain in structured exports or old raw data. Do not relabel them as the new questions or pool old/new responses without reviewing the questionnaire version. Some existing statements were also reworded during development before version tracking was added.
 
 ## Conditional fields and new options
 
@@ -110,3 +110,7 @@ Run `node tests/sheets_schema.test.cjs`. This checks repeated checkbox parsing, 
 A browser submission was intercepted locally to check three separate selected shrines, two challenge choices, current attitude scores, same-day zero cost and omitted planned-stay values. `SURVEY_FIELD_SNAPSHOT.csv` records 270 live field definitions/options from that representative three-shrine scenario. It is an inspection snapshot, not an exhaustive dictionary of every conditional route or future questionnaire version.
 
 The live Apps Script deployment and existing spreadsheet data have not been changed by this audit. Previously submitted rows are not automatically repaired. If earlier derived rows are missing or malformed, the raw sheets may allow reconstruction; preserve a spreadsheet backup before any backfill.
+
+## Optional lucky draw (schema 2026-10-20.2)
+
+`luckyDrawUpi` is restored as an optional participant opt-in field on the final survey page. A non-empty value is the participant's GPay mobile number or UPI ID and indicates agreement to use it for administering the draw. Blank means no entry. The field is included in raw submissions, Respondents, and local exports. Treat it as personal data and exclude it from shared research datasets. No prize amount or draw date is specified. Update the existing Apps Script deployment with the current `google_apps_script.gs` to include the structured Respondents column; the existing raw ingestion also preserves this field.

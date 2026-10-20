@@ -15,7 +15,8 @@ context.appendRows = (name, rows, headers) => {
 };
 
 const params = context.normalizeSubmission({
-  surveySchemaVersion: ['2026-10-20.1'],
+  surveySchemaVersion: ['2026-10-20.2'],
+  luckyDrawUpi: ['testparticipant@okaxis'],
   choiceDesignVersion: ['test-design'], choiceBlock: ['random:test'],
   dhamCurrentVisit: ['Kedarnath; Badrinath; Hemkund Sahib'],
   challenge: ['Shared Path With Ponies; Poor Cleanliness'],
@@ -59,6 +60,7 @@ assert.deepEqual(plain(context.normalizeSubmission({dhamCurrentVisit: ['Kedarnat
 
 const id = 'TEST_ONLY';
 context.writeRespondent(params, id, new Date());
+assert.equal(sheets.get('Respondents').rows[0].luckyDrawUpi, 'testparticipant@okaxis');
 context.writeDhamVisits(params, id);
 context.writeMainHaulSegments(params, id);
 context.writeMainHaulTransfers(params, id);

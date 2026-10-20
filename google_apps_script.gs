@@ -4,7 +4,7 @@
  * to the fresh spreadsheet. Deploy as a Web app (execute as you; access: anyone).
  */
 
-var SCRIPT_VERSION = '2.3';
+var SCRIPT_VERSION = '2.4';
 var RAW_SHEET = 'Sheet1';
 var ORDERED_RAW_SHEET = 'RawOrdered';
 var SPREADSHEET_ID = '1hHwfzS3nLmZl9MdTVWzRGMaYRzGEjrowFV5M0W2mvQs';
@@ -187,7 +187,7 @@ function orderedRawKeys(params) {
     'kedarnathAccessType','kedarnathHelicopterBoardingPoint','kedarnathHelicopterTime','kedarnathHelicopterCost','kedarnathHelicopterWaitingTime',
     'railwayAwareness','hillTrainExperience','railwaySentiment','ropewayAwareness',
     'overallSatisfaction','intentToReturn','integratedUse','integratedNoReason',
-    'overallTripRating','challenge','feedbackChallenge','feedbackOther'
+    'overallTripRating','challenge','feedbackChallenge','feedbackOther','luckyDrawUpi'
   ];
   var patterns = [
     /^ongoingDhamStatus_/, /^dhamSequence_/, /^primary/, /^mainHaulTransfer/, /^interDham/,
@@ -237,7 +237,7 @@ function writeRespondent(params, responseId, submittedAt) {
     'wtpRopewayShrine','wtpRopewayKedarnath','ropewayDriver','integratedUse','integratedPayment','guaranteedSeatWtp','integratedNoReason',
     'integratedTime','integratedCost','integratedComfort','integratedReliability','integratedSafety','railMaxFare','railStress','railCostConcern','railFlexibility','railLuggageTransfer','railComfortPreference','railReliabilityPreference','railFewerChangesPreference',
     'railAccessibility','railCongestion','maxAcceptableWait','overallSatisfaction','intentToReturn',
-    'insuranceMedicalAwareness','overallTripRating','challenge','feedbackChallenge','feedbackSuggestions','feedbackOther'
+    'insuranceMedicalAwareness','overallTripRating','challenge','feedbackChallenge','feedbackSuggestions','feedbackOther','luckyDrawUpi'
   ];
   var row = { responseId: responseId, submittedAt: submittedAt };
   headers.forEach(function(header) { if (row[header] === undefined) row[header] = joined(params, header); });
