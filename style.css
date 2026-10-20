@@ -1,3 +1,34 @@
+.tablet-layout-control {
+    position: fixed;
+    top: 68px;
+    right: 16px;
+    z-index: 49;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+}
+.tablet-layout-control[hidden] { display: none; }
+.tablet-layout-control #tabletLayoutToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+    margin: 0;
+    color: #fff;
+    background: var(--brand);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 10px 24px rgba(28, 59, 76, 0.22);
+    cursor: pointer;
+}
+#tabletLayoutToggle svg[hidden] { display: none; }
+#tabletLayoutToggle:focus-visible { outline: 3px solid #2878b5; outline-offset: 3px; }
+
 /* Base */
 .drb-icon:empty {
     display: none;
@@ -1904,6 +1935,11 @@ body > h2 {
         right: 10px;
     }
 
+    .tablet-layout-control {
+        top: 62px;
+        right: 10px;
+    }
+
     .language-toggle {
         width: 44px;
         min-width: 44px;
@@ -3091,6 +3127,18 @@ table.journey-card-table {
         text-align: center;
     }
 }
+/* Match stopover and stay text to the blue journey card controls. */
+@media (max-width: 600px) {
+    #surveyForm #restLocationTable td::before,
+    #surveyForm #stayDurationTable td::before,
+    #surveyForm #stayDurationTable td:nth-child(n+2):nth-child(-n+6):nth-child(2)::before {
+        font-size: 0.8rem;
+    }
+    #surveyForm #stayDurationTable .stay-duration-button > span {
+        font-size: 0.875rem;
+    }
+}
+
 /* Shrine colors make stopover routes easy to distinguish. */
 #surveyForm #restLocationTable tbody td:first-child {
     background: var(--route-header-color, #345b70);
@@ -3260,7 +3308,7 @@ table.journey-card-table {
         border-radius: 7px;
         background: #f7fafc;
         color: var(--ink);
-        font-size: 0.9rem;
+        font-size: 0.875rem;
     }
     #surveyForm #stayDurationTable .stay-duration-button input:checked + span {
         background: var(--brand-dark);
@@ -3283,7 +3331,7 @@ table.journey-card-table {
         content: "Shrine stay duration";
         display: block;
         color: var(--brand-dark);
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         font-weight: 700;
     }
 }
@@ -3362,3 +3410,288 @@ table.journey-card-table {
         color: #fff;
     }
 }
+
+/* Each shrine has parallel onward and return routes, including on phones. */
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .shrine-journey-summary {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .shrine-directions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-direction {
+    min-width: 0;
+    margin: 0;
+    padding: 8px 4px;
+    text-align: center;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-direction + .journey-direction {
+    border-top: 0;
+    border-left: 1px dashed var(--line);
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-flow {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    min-width: max-content;
+    gap: 6px;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-node,
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-connector {
+    box-sizing: border-box;
+    width: 100px;
+    max-width: 180px;
+    min-width: 100px;
+    overflow-wrap: anywhere;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-line { display: block; }
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-connector::after {
+    content: none;
+    color: var(--brand);
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-visual-empty {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Keep the complete horizontal route visible inside each direction panel. */
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-flow { gap: 3px; }
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-node,
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-connector {
+    width: 70px;
+    min-width: 70px;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-node {
+    min-height: 40px;
+    padding: 4px;
+}
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-node-icon { font-size: 0.9rem; }
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-mode-icon { font-size: 1rem; min-width: 24px; }
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-mode-label,
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-mode-details,
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-node-name { font-size: 0.65rem; }
+
+:is(#lastMileJourneyPreview, #mainHaulJourneyPreview, #wholeTripJourneyPreview) .journey-stay-marker {
+    display: inline-flex;
+    flex: 0 0 86px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 5px;
+    margin: 0 5px;
+    box-sizing: border-box;
+    border: 1px dashed var(--brand);
+    border-radius: 8px;
+    background: #fff8e8;
+    color: var(--brand-dark);
+    font-size: 0.65rem;
+    white-space: normal;
+    text-align: center;
+}
+
+.whole-trip-summary { margin: 16px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.whole-trip-summary > summary { cursor: pointer; color: var(--brand-dark); font-weight: 700; min-height: 44px; align-content: center; }
+
+/* Show the full-trip chain at a readable size with contained sideways scrolling. */
+#wholeTripJourneyPreview .journey-direction {
+    text-align: left;
+    padding: 12px 8px 18px;
+    scrollbar-width: auto;
+    scrollbar-color: var(--brand) #dceaf0;
+}
+#wholeTripJourneyPreview .journey-direction:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+}
+#wholeTripJourneyPreview .journey-flow { gap: 10px; padding: 18px 0; }
+#wholeTripJourneyPreview .journey-node,
+#wholeTripJourneyPreview .journey-connector { width: 120px; min-width: 120px; }
+#wholeTripJourneyPreview .journey-node { min-height: 76px; padding: 10px 8px; }
+#wholeTripJourneyPreview .journey-node-icon { font-size: 1.4rem; }
+#wholeTripJourneyPreview .journey-mode-icon { font-size: 1.6rem; min-width: 34px; }
+#wholeTripJourneyPreview .journey-node-name,
+#wholeTripJourneyPreview .journey-mode-label,
+#wholeTripJourneyPreview .journey-mode-details,
+#wholeTripJourneyPreview .journey-segment-route { font-size: 0.85rem; }
+#wholeTripJourneyPreview .journey-mode-details { white-space: normal; text-align: center; }
+#wholeTripJourneyPreview .journey-stay-marker {
+    flex-basis: 140px;
+    padding: 12px 8px;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+/* A compact trip overview, with one clearly grouped row for each shrine. */
+#wholeTripJourneyPreview { overflow: visible; }
+.trip-quick-shrine, .trip-quick-home {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+}
+#wholeTripJourneyPreview h3 { margin: 0 0 10px; font-size: 1rem; color: var(--brand-dark); }
+.trip-quick-shrine h3 > span {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--brand); color: white; margin-right: 6px;
+}
+.trip-quick-columns { display: grid; grid-template-columns: 1fr 1.2fr 0.7fr; gap: 16px; }
+.trip-quick-columns > div { min-width: 0; }
+#wholeTripJourneyPreview h4 { margin: 0 0 6px; font-size: 0.8rem; color: var(--muted); }
+.trip-quick-leg { display: flex; gap: 7px; margin: 6px 0; font-size: 0.85rem; line-height: 1.35; }
+.trip-quick-leg > span { font-size: 1.2rem; }
+.trip-quick-leg b { font-weight: 600; }
+.trip-quick-leg small { display: block; color: var(--muted); font-size: 0.78rem; }
+.trip-quick-return { font-size: 0.78rem; color: var(--brand-dark); margin: 6px 0 0; }
+#wholeTripJourneyPreview .trip-quick-columns .journey-stay-marker {
+    border: 0; margin: 0; padding: 0; background: transparent;
+    text-align: left; align-items: flex-start; font-size: 0.85rem;
+}
+@media (max-width: 600px) {
+    .trip-quick-columns { grid-template-columns: 1fr; gap: 10px; }
+    .trip-quick-columns > div + div { border-top: 1px solid var(--line); padding-top: 8px; }
+}
+
+/* Read the trip from left to right as a sequence of compact shrine cards. */
+#wholeTripJourneyPreview .trip-quick-chain {
+    display: flex;
+    align-items: stretch;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 8px 4px 16px;
+    overscroll-behavior-x: contain;
+    scrollbar-color: var(--brand) #dceaf0;
+}
+#wholeTripJourneyPreview .trip-quick-chain:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+}
+#wholeTripJourneyPreview .trip-quick-chain > article {
+    flex: 0 0 580px;
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+}
+#wholeTripJourneyPreview .trip-quick-chain > article + article::before {
+    content: '\2192';
+    position: absolute;
+    left: -22px;
+    top: 16px;
+    font-size: 1.2rem;
+    color: var(--brand);
+}
+#wholeTripJourneyPreview .trip-quick-columns {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 0.7fr;
+    gap: 10px;
+}
+#wholeTripJourneyPreview .trip-quick-columns > div + div {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+    padding-top: 0;
+    padding-left: 10px;
+}
+
+/* Center answer text consistently across survey button styles. */
+#surveyForm .answer-choice > span,
+#surveyForm .compact-choice-buttons > label > span,
+#surveyForm .journey-select-buttons button,
+#surveyForm .stay-duration-button > span,
+#surveyForm button {
+    text-align: center;
+    justify-content: center;
+}
+
+#lastMileJourneyPreview > .journey-visual-title {
+    padding: 0;
+    margin: 0 0 10px;
+    border: 0;
+    background: transparent;
+    color: var(--brand-dark);
+    font-weight: 800;
+}
+
+/* Frame the complete shrine diagram like the main-haul diagram. */
+#lastMileJourneyPreview {
+    padding: 14px;
+    max-height: 220px;
+    overflow: auto;
+    background: #edf5fb;
+    border: 1px solid #bfd2e2;
+    border-radius: 10px;
+}
+#lastMileJourneyPreview .shrine-journey-summary {
+    padding: 10px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+#lastMileJourneyPreview .shrine-journey-summary + .shrine-journey-summary {
+    border-top: 1px dashed #a9c2d7;
+}
+
+/* Size the preview frame around its diagram, within the available screen width. */
+#mainHaulJourneyPreview,
+#lastMileJourneyPreview {
+    width: fit-content;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    box-sizing: border-box;
+    scrollbar-gutter: auto;
+}
+#mainHaulJourneyPreview .journey-direction,
+#lastMileJourneyPreview .journey-direction {
+    padding-bottom: 8px;
+}
+
+/* Use the available row for the diagram rather than leaving an empty right side. */
+#mainHaulJourneyPreview,
+#lastMileJourneyPreview {
+    width: 100%;
+    margin-bottom: 12px;
+}
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-flow {
+    width: 100%;
+    min-width: max-content;
+    justify-content: space-between;
+    gap: 6px;
+}
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-node,
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-connector {
+    flex: 1 0 85px;
+    width: auto;
+    min-width: 85px;
+    max-width: none;
+}
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-node {
+    min-height: 56px;
+    padding: 6px;
+}
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-node-name,
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-mode-label,
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-mode-details {
+    font-size: 0.8rem;
+}
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-node-icon { font-size: 1.2rem; }
+:is(#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview) .journey-mode-icon { font-size: 1.4rem; }
+
+#wholeTripJourneyPreview { width: 100%; max-width: 100%; max-height: none; box-sizing: border-box; scrollbar-gutter: auto; }
+#wholeTripJourneyPreview .journey-direction { text-align: center; padding: 8px 4px; }
+#wholeTripJourneyPreview .journey-stay-marker { flex: 0 0 100px; font-size: 0.8rem; padding: 8px 5px; }
+
+#wholeTripJourneyPreview .download-trip-image {
+    margin: 0 8px 10px 0;
+    min-height: 44px;
+    padding: 8px 14px;
+}
+#wholeTripJourneyPreview .trip-download-status { font-size: 0.85rem; color: var(--muted); }

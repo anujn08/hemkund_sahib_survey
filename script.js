@@ -20,7 +20,7 @@ function enhanceJourneySelectButtons(scope = document) {
             && (!element.dataset.selectName || element.dataset.selectName === select.name));
         const isPhoneStopover = Boolean(select.closest('#restLocationTable, #stayDurationTable, #lastMileTable'));
         if (isPhoneStopover) {
-            if (!window.matchMedia('(max-width: 600px)').matches) {
+            if (!window.isSurveyPhoneLayout()) {
                 if (group?.classList.contains('journey-select-buttons')) group.remove();
                 select.classList.remove('journey-button-source');
                 return;
@@ -1102,11 +1102,11 @@ function getJourneyPlaceCode(place = '') {
         'janki chatti/kharsali': 'JKT', 'yamunotri': 'YMN', 'yamunotri temple': 'YMN',
         'govindghat': 'GVG', 'govindghat/gangharia': 'GVG', 'govindghat/ghangaria': 'GVG',
         'ghangaria': 'GHG', 'hemkund sahib': 'HKS', 'phata': 'PHT', 'sersi': 'SRS',
-        'kharsali helipad': 'KHL', 'harsil/jhalla helipad': 'HJL',
+        'kharsali helipad': 'KHL', 'harshil/jhalla helipad': 'HJL',
         'kedarnath helipad': 'KDH', 'badrinath helipad': 'BDH',
         'guptkashi': 'GPK', 'devprayag': 'DVP', 'srinagar garhwal': 'SGR',
         'rudraprayag': 'RDP', 'karnaprayag': 'KNP', 'uttarkashi': 'UTK',
-        'barkot': 'BKT', 'harsil': 'HSL', 'joshimath': 'JSM', 'pipalkoti': 'PPK',
+        'barkot': 'BKT', 'harshil': 'HSL', 'joshimath': 'JSM', 'pipalkoti': 'PPK',
         'chamoli': 'CML'
     };
     return codes[normalized] || String(place);
@@ -1137,7 +1137,7 @@ const DHAM_ROUTE_INFO = {
     'Gangotri': {
         icon: '', color: '#4a5a7a', state: 'Uttarakhand',
         altitude: '3,100', district: 'Uttarkashi',
-        trekLabel: 'Road access', trekRoute: 'Harsil → Gangotri Temple',
+        trekLabel: 'Road access', trekRoute: 'Harshil → Gangotri Temple',
         profile: [[0,100],[50,55],[100,18]]
     },
     'Hemkund Sahib': {
@@ -1199,7 +1199,7 @@ function getMainJourneyStopsByDham() {
     return stops;
 }
 
-function journeyFlowHTML(legs) {
+function journeyFlowHTML(legs, pauses = {}) {
     if (!legs.length) return '';
     let html = journeyPlaceHTML(legs[0].from, '👤');
     legs.forEach((leg, index) => {
@@ -1222,7 +1222,7 @@ function journeyFlowHTML(legs) {
             ${details.length ? `<span class="journey-mode-details">${details.join(' · ')}</span>` : ''}
             ${leg.stops?.length ? `<span class="journey-stop-label">⏸ ${leg.stops.map(stop => `<abbr title="${escapeAttribute(stop)}">${escapeHTML(getJourneyPlaceCode(stop))}</abbr>`).join(' · ')}</span>` : ''}
         </span>
-        ${journeyPlaceHTML(leg.to, '📍', leg.toKind || 'destination')}`;
+        ${journeyPlaceHTML(leg.to, '📍', leg.toKind || 'destination')}${pauses[index] || ''}`;
     });
     const transferLegend = legs.some(leg => leg.toKind === 'transfer')
         ? '<div class="journey-transfer-legend">🔄 Intermediate transfer/change location &nbsp; · &nbsp; 📍 Shrine base or destination</div>'
@@ -1264,7 +1264,10 @@ function getInterDhamPreviewLegs(from, to, pairKey) {
     return result;
 }
 
+const tripPreviewState = { main: null, shrines: [] };
+
 function renderMainHaulJourneyPreview() {
+    tripPreviewState.main = null;
     const preview = document.getElementById('mainHaulJourneyPreview');
     if (!preview) return;
     const startControl = document.querySelector('input[name="startPoint"]:checked');
@@ -1388,6 +1391,13 @@ function renderMainHaulJourneyPreview() {
     });
 
     const returnJourneyType = document.querySelector('input[name="returnJourneyType"]:checked')?.value || '';
+    const renderDirections = (returnLegs = [], returnLabel = 'Return') => {
+        tripPreviewState.main = { legs, returnLegs, returnLabel };
+        preview.innerHTML = '<div class="journey-visual-title">Your main-haul onward and return journey</div>'
+            + packageSummaryHTML + '<div class="journey-direction shrine-connected-route"><b>Onward &rarr; '
+            + escapeHTML(returnLabel) + '</b>' + journeyFlowHTML([...legs, ...returnLegs])
+            + (returnLegs.length ? '' : '<p class="journey-visual-empty">Choose your return option to see this route.</p>') + '</div>';
+    };
     if (returnJourneyType === 'same') {
         const returnLeg = {
             from: legs[legs.length - 1]?.to || getMainHaulBaseDestination(orderedDhams[orderedDhams.length - 1]),
@@ -1404,10 +1414,7 @@ function renderMainHaulJourneyPreview() {
             returnLeg.timeLabel = '';
             returnLeg.costLabel = '';
         }
-        preview.innerHTML = `<div class="journey-visual-title">Your onward and return journey</div>
-            ${packageSummaryHTML}
-            <div class="journey-flow-group"><strong>Onward</strong>${journeyFlowHTML(legs)}</div>
-            <div class="journey-flow-group"><strong>Return directly to starting point</strong>${journeyFlowHTML([returnLeg])}</div>`;
+        renderDirections([returnLeg], 'Return directly to starting point');
         return;
     }
 
@@ -1433,17 +1440,15 @@ function renderMainHaulJourneyPreview() {
             });
         });
         if (!returnLegs.length) returnLegs.push({ from: finalDestination, to: start, mode: '' });
-        preview.innerHTML = `<div class="journey-visual-title">Your onward and return journey</div>
-            ${packageSummaryHTML}
-            <div class="journey-flow-group"><strong>Onward</strong>${journeyFlowHTML(legs)}</div>
-            <div class="journey-flow-group"><strong>${returnContinuity === 'Changed vehicle or mode' ? 'Return with vehicle/mode changes' : 'Return with one vehicle/mode'}</strong>${journeyFlowHTML(returnLegs)}</div>`;
+        renderDirections(returnLegs, returnContinuity === 'Changed vehicle or mode' ? 'Return with vehicle/mode changes' : 'Return with one vehicle/mode');
         return;
     }
 
-    preview.innerHTML = `<div class="journey-visual-title">Your onward journey</div>${packageSummaryHTML}${journeyFlowHTML(legs)}`;
+    renderDirections();
 }
 
 function renderLastMileJourneyPreview() {
+    tripPreviewState.shrines = [];
     const preview = document.getElementById('lastMileJourneyPreview');
     if (!preview) return;
     const groups = [];
@@ -1534,18 +1539,30 @@ function renderLastMileJourneyPreview() {
         const returnType = document.querySelector(`input[name="lastMileReturnType_${slug}"]:checked`)?.value || '';
         const returnLegs = legs.slice().reverse().map(leg => ({ ...leg, from: leg.to, to: leg.from, waiting: '' }));
         updateLastMileReturnRouteText(slug, returnLegs);
-        let returnHTML = '';
+        let returnHTML = `<p class="journey-visual-empty">${returnType === 'Not completed' ? 'Return not completed' : 'Choose your return option to see this route.'}</p>`;
         if (returnType === 'Different') {
             returnLegs.splice(0, returnLegs.length, ...getLastMileReturnLegValues(slug));
         }
         if ((returnType === 'Same as onward' || returnType === 'Different') && returnLegs.length) {
-            returnHTML = `<div class="journey-direction"><b>Return</b>${journeyFlowHTML(returnLegs)}</div>`;
+            returnHTML = journeyFlowHTML(returnLegs);
         }
-        const directionLabels = returnHTML ? `<div class="journey-direction"><b>Onward</b>${journeyFlowHTML(legs)}</div>${returnHTML}` : journeyFlowHTML(legs);
+        const staySelect = document.querySelector(`select[name="stayAccom_${slug}"]`);
+        const stayType = staySelect?.selectedOptions[0]?.textContent.trim() || '';
+        const duration = document.querySelector(`input[name="stayDuration_${slug}"]:checked`)?.nextElementSibling?.textContent.trim() || '';
+        const stayLocation = document.querySelector(`input[name="stayLocation_${slug}"]`)?.value || dham;
+        const stayDetails = [stayType && staySelect.value ? stayType : '', duration].filter(Boolean);
+        const stayHTML = `<span class="journey-stay-marker"><span aria-hidden="true">${staySelect?.value === 'Same day return (no overnight stay)' ? '☀️' : '🛏️'}</span><b>${escapeHTML(stayLocation)}</b><span>${stayDetails.length ? stayDetails.map(escapeHTML).join(' · ') : 'Stay details not entered'}</span></span>`;
+        const hasReturn = (returnType === 'Same as onward' || returnType === 'Different') && returnLegs.length;
+        tripPreviewState.shrines.push({ dham, legs, returnLegs: hasReturn ? returnLegs : [], stayHTML, returnType });
+        const connectedLegs = hasReturn ? [...legs, ...returnLegs] : legs;
+        const directionLabels = `<div class="journey-direction shrine-connected-route"><b>Onward → Stay → Return</b>
+            ${journeyFlowHTML(connectedLegs, { [legs.length - 1]: stayHTML })}
+            ${hasReturn ? '' : returnHTML}
+        </div>`;
         const ghangariaStop = dham === 'Hemkund Sahib' && !hemkundDirect
             ? document.querySelector('[name="lastMileApproachStop_HemkundSahib"]:checked')?.value || '' : '';
         const stopHTML = ghangariaStop ? `<p class="field-helper">Ghangaria: ${escapeHTML(ghangariaStop)}</p>` : '';
-        groups.push(`<div class="journey-flow-group">${dhamRouteBannerHTML(dham)}${directionLabels}${stopHTML}</div>`);
+        groups.push(`<div class="journey-flow-group shrine-journey-summary">${dhamRouteBannerHTML(dham)}${directionLabels}${stopHTML}</div>`);
     });
 
     preview.innerHTML = groups.length
@@ -1562,6 +1579,144 @@ function updateLastMileReturnRouteText(slug, returnLegs) {
 function renderJourneyPreviews() {
     renderMainHaulJourneyPreview();
     renderLastMileJourneyPreview();
+    renderWholeTripPreview();
+}
+
+function renderWholeTripPreview() {
+    const preview = document.getElementById('wholeTripJourneyPreview');
+    if (!preview) return;
+    const main = tripPreviewState.main;
+    if (!main) {
+        preview.innerHTML = '<p class="journey-visual-empty">Enter your starting point, shrine order and travel details to see your whole trip.</p>';
+        return;
+    }
+    const legs = [];
+    const pauses = {};
+    const remaining = [...tripPreviewState.shrines];
+    const notes = [];
+    main.legs.forEach(leg => {
+        legs.push(leg);
+        const index = remaining.findIndex(shrine => leg.to === getMainHaulBaseDestination(shrine.dham)
+            || leg.to === getHelicopterArrivalPoint(shrine.dham));
+        if (index < 0) return;
+        const shrine = remaining.splice(index, 1)[0];
+        legs.push(...shrine.legs);
+        pauses[legs.length - 1] = shrine.stayHTML;
+        if (shrine.returnLegs.length) legs.push(...shrine.returnLegs);
+        else {
+            const label = shrine.returnType === 'Not completed' ? 'Return not completed' : 'Return details not entered';
+            notes.push(shrine.dham + ': ' + label + '.');
+            legs.push({from: shrine.legs.at(-1)?.to || shrine.dham, to: leg.to, mode: label});
+        }
+    });
+    legs.push(...main.returnLegs);
+    if (!main.returnLegs.length) notes.push('Final return journey details not entered.');
+    tripPreviewState.whole = { legs, pauses, notes };
+    preview.innerHTML = '<div class="journey-visual-title">Your complete trip chain</div>'
+        + '<button type="button" class="download-trip-image" onclick="downloadWholeTripImage(this)">Download image</button><span class="trip-download-status" role="status"></span>'
+        + '<div class="journey-direction" tabindex="0" role="region" aria-label="Complete trip diagram, scroll sideways">'
+        + '<b>Main haul &rarr; Shrine approach &rarr; Stay &rarr; Return</b>'
+        + journeyFlowHTML(legs, pauses) + '</div>'
+        + (notes.length ? '<p class="field-helper">' + notes.map(escapeHTML).join(' ') + '</p>' : '');
+}
+
+async function downloadWholeTripImage(button) {
+    const trip = tripPreviewState.whole;
+    if (!trip?.legs.length) return;
+    const status = button.nextElementSibling;
+    button.disabled = true;
+    status.textContent = ' Preparing image…';
+    try {
+        await document.fonts.ready;
+        const canvas = document.createElement('canvas');
+        const nodeWidth = 130;
+        const segmentWidth = 155;
+        const stayWidth = 140;
+        const margin = 24;
+        canvas.width = margin * 2 + nodeWidth + trip.legs.length * (segmentWidth + nodeWidth)
+            + Object.keys(trip.pauses).length * stayWidth;
+        canvas.height = 330 + trip.notes.length * 22;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#edf5fb';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#234b60';
+        ctx.font = 'bold 22px Georgia';
+        ctx.fillText('Your complete trip chain', margin, 20);
+        ctx.font = '16px Georgia';
+        ctx.fillText('Main haul → Shrine approach → Stay → Return', margin, 55);
+        const textLines = (text, x, y, width, font = '16px Georgia') => {
+            ctx.font = font;
+            let line = '';
+            let lineY = y;
+            for (const word of String(text).split(/\s+/)) {
+                const next = line ? `${line} ${word}` : word;
+                if (line && ctx.measureText(next).width > width) {
+                    ctx.fillText(line, x, lineY);
+                    lineY += 20;
+                    line = word;
+                } else line = next;
+            }
+            if (line) ctx.fillText(line, x, lineY);
+            return lineY + 22;
+        };
+        const place = (label, x) => {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#7fa8c7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(x, 135, nodeWidth, 85, 9);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#234b60';
+            textLines(label, x + 10, 150, nodeWidth - 20, 'bold 16px Georgia');
+        };
+        let x = margin;
+        place(trip.legs[0].from, x);
+        x += nodeWidth;
+        trip.legs.forEach((leg, index) => {
+            ctx.strokeStyle = '#356d86';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(x + 5, 160); ctx.lineTo(x + segmentWidth - 10, 160); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x + segmentWidth - 10, 160); ctx.lineTo(x + segmentWidth - 20, 154); ctx.lineTo(x + segmentWidth - 20, 166); ctx.closePath();
+            ctx.fillStyle = '#356d86'; ctx.fill();
+            ctx.fillStyle = '#234b60';
+            textLines(`Part ${index + 1}`, x + 12, 100, segmentWidth - 24, 'bold 15px Georgia');
+            textLines(getJourneyModeIcon(leg.mode || ''), x + 55, 128, 50, '24px "Segoe UI Emoji", sans-serif');
+            let y = textLines(leg.mode || 'Mode not entered', x + 10, 180, segmentWidth - 20);
+            const details = [leg.timeLabel || (leg.time ? `${leg.time} hr` : ''), leg.costLabel || (leg.cost !== '' && leg.cost != null ? `₹${leg.cost}` : '')].filter(Boolean);
+            textLines(details.join(' · '), x + 10, y, segmentWidth - 20, '14px Georgia');
+            x += segmentWidth;
+            place(leg.to, x);
+            x += nodeWidth;
+            if (trip.pauses[index]) {
+                const marker = document.createElement('div');
+                marker.innerHTML = trip.pauses[index];
+                const stayText = Array.from(marker.firstElementChild.children, child => child.textContent).join(' ');
+                ctx.fillStyle = '#fff8e8'; ctx.strokeStyle = '#ad8b51';
+                ctx.beginPath(); ctx.roundRect(x + 8, 115, stayWidth - 16, 145, 8); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#234b60';
+                textLines(stayText, x + 16, 130, stayWidth - 32);
+                x += stayWidth;
+            }
+        });
+        trip.notes.forEach((note, index) => {
+            ctx.fillStyle = '#526a78'; ctx.font = '15px Georgia';
+            ctx.fillText(note, margin, 305 + index * 22);
+        });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('Image unavailable');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'pilgrimage-whole-trip.png';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        status.textContent = ' Image downloaded.';
+    } catch (error) {
+        status.textContent = ' Could not create the image. Please try again.';
+    } finally {
+        button.disabled = false;
+    }
 }
 
 // --- Dynamic Table Functions ---
@@ -1588,7 +1743,7 @@ function getDhamShrineDestination(dham) {
 function getHelicopterArrivalPoint(dham) {
     const arrivals = {
         Yamunotri: 'Kharsali Helipad',
-        Gangotri: 'Harsil/Jhalla Helipad',
+        Gangotri: 'Harshil/Jhalla Helipad',
         Kedarnath: 'Kedarnath Helipad',
         Badrinath: 'Badrinath Helipad'
     };
@@ -1676,10 +1831,10 @@ function getHelicopterWaitingChoices() {
 
 function getTransferLocationSuggestions(fromDham = '', toDham = '') {
     const pairSuggestions = {
-        'Yamunotri__Gangotri': ['Barkot', 'Dharasu Bend', 'Uttarkashi', 'Harsil'],
-        'Gangotri__Yamunotri': ['Harsil', 'Uttarkashi', 'Dharasu Bend', 'Barkot'],
+        'Yamunotri__Gangotri': ['Barkot', 'Dharasu Bend', 'Uttarkashi', 'Harshil'],
+        'Gangotri__Yamunotri': ['Harshil', 'Uttarkashi', 'Dharasu Bend', 'Barkot'],
         'Gangotri__Kedarnath': ['Uttarkashi', 'Chinyalisaur', 'Tehri', 'Srinagar Garhwal', 'Rudraprayag', 'Guptkashi', 'Sonprayag'],
-        'Kedarnath__Gangotri': ['Sonprayag', 'Guptkashi', 'Rudraprayag', 'Srinagar Garhwal', 'Tehri', 'Uttarkashi', 'Harsil'],
+        'Kedarnath__Gangotri': ['Sonprayag', 'Guptkashi', 'Rudraprayag', 'Srinagar Garhwal', 'Tehri', 'Uttarkashi', 'Harshil'],
         'Kedarnath__Badrinath': ['Guptkashi', 'Rudraprayag', 'Karnaprayag', 'Chamoli', 'Pipalkoti', 'Joshimath'],
         'Badrinath__Kedarnath': ['Joshimath', 'Pipalkoti', 'Chamoli', 'Karnaprayag', 'Rudraprayag', 'Guptkashi', 'Sonprayag'],
         'Badrinath__HemkundSahib': ['Joshimath', 'Govindghat'],
@@ -2266,7 +2421,7 @@ const ALL_STOPOVER_LOCATIONS = [
     'Govindghat',
     'Ghangaria',
     'Uttarkashi',
-    'Harsil',
+    'Harshil',
     'Gangotri',
     'Barkot',
     'Janki Chatti',
@@ -2277,7 +2432,7 @@ const ALL_STOPOVER_LOCATIONS = [
 const STOPOVER_LOCATIONS_BY_DHAM = {
     Kedarnath: ['Haridwar', 'Rishikesh', 'Devprayag', 'Srinagar Garhwal', 'Rudraprayag', 'Guptkashi', 'Phata', 'Sonprayag', 'Gaurikund', 'Other'],
     Badrinath: ['Haridwar', 'Rishikesh', 'Devprayag', 'Srinagar Garhwal', 'Rudraprayag', 'Karnaprayag', 'Chamoli', 'Pipalkoti', 'Joshimath', 'Badrinath', 'Other'],
-    Gangotri: ['Haridwar', 'Rishikesh', 'Uttarkashi', 'Harsil', 'Gangotri', 'Other'],
+    Gangotri: ['Haridwar', 'Rishikesh', 'Uttarkashi', 'Harshil', 'Gangotri', 'Other'],
     Yamunotri: ['Haridwar', 'Rishikesh', 'Barkot', 'Janki Chatti', 'Yamunotri', 'Other'],
     'Hemkund Sahib': ['Haridwar', 'Rishikesh', 'Devprayag', 'Srinagar Garhwal', 'Rudraprayag', 'Karnaprayag', 'Chamoli', 'Pipalkoti', 'Joshimath', 'Govindghat', 'Ghangaria', 'Other']
 };
@@ -2315,10 +2470,34 @@ function getStopoverChoiceOptions(purpose, kind) {
         + '<option value="exact">Other / exact value</option>';
 }
 
+function getStopoverPlaceOptions(purpose = '') {
+    const placesByPurpose = {
+        'Food/Refreshment': ['Roadside Food/Tea Stall', 'Restaurant/Dhaba', 'Other'],
+        'Rest/Toilet Break': ['Public Rest/Toilet Facility', 'Roadside Rest Area', 'Restaurant/Dhaba', 'Other'],
+        'Night Halt/Accommodation': ['Hotel', 'Dormitory', 'Dharamshala', 'Gurudwara', 'Guest House', 'Ashram', 'Tent', 'Other'],
+        'Sightseeing': ['Viewpoint/Tourist Spot', 'Temple/Religious Site', 'Market/Local Attraction', 'Other'],
+        'Medical/First Aid': ['First Aid Post/Medical Camp', 'Clinic/Hospital', 'Pharmacy', 'Other'],
+        'Parking/Vehicle Change': ['Parking Area', 'Bus Stand/Taxi Stand', 'Transport Hub/Interchange', 'Other']
+    };
+    const places = placesByPurpose[purpose] || (purpose ? ['N/A', 'Other'] : []);
+    return '<option value="">--Select place type--</option>' + places.map(place =>
+        `<option value="${escapeAttribute(place)}">${place === 'N/A' ? 'Short stop' : place === 'Other' && purpose === 'Night Halt/Accommodation' ? 'Other accommodation' : escapeHTML(place)}</option>`).join('');
+}
+
 function updateStopoverChoices(control) {
     const row = control.closest('tr');
     if (!row) return;
     const purpose = row.querySelector('select[name^="restPurpose_"]')?.value || '';
+    if (control.name.startsWith('restPurpose_')) {
+        const place = row.querySelector('select[name^="restAccom_"]');
+        if (place) {
+            const previous = place.value;
+            place.innerHTML = getStopoverPlaceOptions(purpose);
+            place.value = Array.from(place.options).some(option => option.value === previous) ? previous : '';
+            lockEnglishOptionValues(place);
+            updateOtherSpecifyField(place);
+        }
+    }
     ['Duration', 'Cost'].forEach(kind => {
         const choice = row.querySelector(`select[name^="rest${kind}Choice_"]`);
         const exact = row.querySelector(`input[name^="rest${kind}_"]`);
@@ -2326,11 +2505,8 @@ function updateStopoverChoices(control) {
         if (control.name.startsWith('restPurpose_')) {
             const previous = choice.value;
             choice.innerHTML = getStopoverChoiceOptions(purpose, kind);
-            // Keep a previously chosen range even if the new purpose suggests different ranges.
-            if (previous && !Array.from(choice.options).some(option => option.value === previous)) {
-                choice.add(new Option(previous, previous), choice.options.length - 1);
-            }
-            choice.value = previous;
+            // A duration from a short break must not carry over into a night halt.
+            choice.value = Array.from(choice.options).some(option => option.value === previous) ? previous : '';
             lockEnglishOptionValues(choice);
         }
         const showExact = choice.value === 'exact';
@@ -2344,9 +2520,9 @@ function createRestLocationRowHTML(index, dham = '') {
     const isAutoDhamRow = Boolean(dham);
     const dhamSlug = getDhamSlug(dham);
     const rowId = isAutoDhamRow ? `rest-row-${dhamSlug}` : `rest-row-extra-${index}`;
-    const purposeOptions = `<option value="">--Select--</option><option>Food/Refreshment</option><option>Rest/Toilet Break</option><option>Night Halt/Accommodation</option><option>Sightseeing</option><option>Medical/First Aid</option><option>Parking/Vehicle Change</option><option>Other</option>`;
+    const purposeOptions = `<option value="">--Select--</option><option value="Food/Refreshment">Food</option><option>Rest/Toilet Break</option><option value="Night Halt/Accommodation">Night halt</option><option>Sightseeing</option><option>Medical/First Aid</option><option>Parking/Vehicle Change</option><option>Other</option>`;
     const locationOptions = buildStopoverLocationOptions(dham);
-    const accomOptions = `<option value="N/A">N/A (Short Stop)</option><option>Roadside Food/Tea Stall</option><option>Restaurant/Dhaba</option><option>Public Rest/Toilet Facility</option><option>Hotel</option><option>Dormitory</option><option>Dharamsala/Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Parking/Transport Hub</option><option>Other</option>`;
+    const accomOptions = getStopoverPlaceOptions();
     const requiredAttr = isAutoDhamRow ? '' : ' required';
     const routeCell = isAutoDhamRow
         ? `Route to ${escapeHTML(dham)}<input type="hidden" name="restRoute_${index}" value="Route to ${escapeAttribute(dham)}">`
@@ -2633,7 +2809,7 @@ function getLastMileRouteSegment(dham) {
         const helicopterRoutes = {
             Kedarnath: 'Kedarnath Helipad → Kedarnath Temple (about 500 m)',
             Badrinath: 'Badrinath Helipad → Badrinath Temple/local stay',
-            Gangotri: 'Harsil/Jhalla Helipad → Gangotri Temple',
+            Gangotri: 'Harshil/Jhalla Helipad → Gangotri Temple',
             Yamunotri: 'Kharsali Helipad → Yamunotri Temple'
         };
         return helicopterRoutes[dham] || `${getHelicopterArrivalPoint(dham)} → ${getDhamShrineDestination(dham)}`;
@@ -2775,7 +2951,7 @@ function updateAccommodationCosts(migrateExact = false) {
 function createStayDurationRowHTML(dham) {
     const stayLocation = dham === 'Hemkund Sahib' ? 'Ghangaria' : dham;
     const dhamSlug = dham.replace(/\s/g, '');
-    const accomOptions = `<option value="">--Select--</option><option>Same day return (no overnight stay)</option><option>Hotel</option><option>Dormitory</option><option>Dharamsala/Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
+    const accomOptions = `<option value="">--Select--</option><option value="Same day return (no overnight stay)">Same day return</option><option>Hotel</option><option>Dormitory</option><option>Dharamshala</option><option>Gurudwara</option><option>Guest House</option><option>Ashram</option><option>Tent</option><option>Other</option>`;
     return `
         <tr id="stay-duration-row-${dhamSlug}" style="--route-header-color:${DHAM_ROUTE_INFO[dham]?.color || '#345b70'}">
             <td>${stayLocation}${dham === 'Hemkund Sahib' ? '<small class="field-helper">Hemkund Sahib overnight base</small>' : ''}<input type="hidden" name="stayLocation_${dhamSlug}" value="${escapeAttribute(stayLocation)}"></td>
@@ -5117,3 +5293,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!page) return;
     queueMicrotask(() => refreshAnswerFeedback(page, true));
 }));
+
+// Scale each horizontal summary to its available width after answers or layout change.
+document.addEventListener('DOMContentLoaded', () => {
+    const previews = document.querySelectorAll('#mainHaulJourneyPreview, #lastMileJourneyPreview, #wholeTripJourneyPreview');
+    let scheduled = false;
+    const fit = () => {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+            scheduled = false;
+            previews.forEach(preview => preview.querySelectorAll('.journey-flow').forEach(flow => {
+                if (preview.id === 'wholeTripJourneyPreview') {
+                    flow.style.zoom = '1';
+                    return;
+                }
+                const available = flow.parentElement.clientWidth - 8;
+                if (available <= 0) return;
+                flow.style.zoom = '1';
+                const fullWidth = Math.max(flow.scrollWidth, flow.offsetWidth);
+                flow.style.zoom = String(Math.min(1, available / fullWidth));
+            }));
+        });
+    };
+    const resize = new ResizeObserver(fit);
+    const changes = new MutationObserver(fit);
+    previews.forEach(preview => {
+        resize.observe(preview);
+        changes.observe(preview, {childList: true, subtree: true});
+    });
+    fit();
+});

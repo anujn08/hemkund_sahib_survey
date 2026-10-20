@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pilgrimage Travel Survey</title>
 
-  <link rel="stylesheet" href="style.css?v=20261020-mobile-controls-4">
+  <link id="surveyStyles" rel="stylesheet" href="style.css?v=20261020-download-trip-1">
+  <script src="tablet-layout.js?v=20261020-tablet-layout-3"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
@@ -48,6 +49,12 @@
   </div>
 
   <h1>Pilgrimage Travel Survey</h1>
+  <div id="tabletLayoutControl" class="tablet-layout-control" hidden>
+    <button type="button" id="tabletLayoutToggle" aria-label="Switch to tablet view" title="Switch to tablet view" aria-pressed="false">
+      <svg class="layout-icon-tablet" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M3 9h18"/></svg>
+      <svg class="layout-icon-phone" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" hidden><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/></svg>
+    </button>
+  </div>
 
   <div id="progress-indicator">
       <span class="step"></span>
@@ -555,11 +562,6 @@
           </div>
         </fieldset>
 
-        <section class="journey-visual" id="mainHaulJourneyPreview" aria-live="polite">
-          <div class="journey-visual-title">Your onward journey</div>
-          <p class="journey-visual-empty">Select your starting point, shrine order, and travel mode to build the route.</p>
-        </section>
-
         <div id="mainHaulJourneyDetails" style="display:none;">
         <p id="mainHaulTransferHint" class="field-helper"></p>
         <h4>A4.1 Travel to the first shrine or nearby town</h4>
@@ -740,6 +742,11 @@
         <p id="plannedStopoverTableNote" class="field-helper" hidden><small>* Planned next: choose a prebooked arrangement to enter known details; otherwise stopover questions are skipped.</small></p>
         <button type="button" id="addRestLocationRow">Add Additional Rest Stop</button>
 
+        <section class="journey-visual" id="mainHaulJourneyPreview" aria-live="polite">
+          <div class="journey-visual-title">Your onward journey</div>
+          <p class="journey-visual-empty">Select your starting point, shrine order, and travel mode to build the route.</p>
+        </section>
+
         <div class="nav-buttons">
           <div style="float:left;">
             <button type="button" onclick="nextPrev(-1)">Previous</button>
@@ -753,12 +760,6 @@
   <div class="form-page" id="page-2C-lastmile">
     <p class="fatigue-progress" style="text-align:right;">Page 3 of 9 · ~3 min</p>
     <h2>Section A (continued): Travel to the shrine and your stay</h2>
-
-        <section class="journey-visual" id="lastMileJourneyPreview" aria-live="polite">
-          <div class="journey-visual-title">Your shrine approach</div>
-          <p class="journey-visual-empty">Select a last-mile mode to build the route.</p>
-        </section>
-
 
         <h4>A4.2 Last-Mile Travel (Base Camp / Road-head → Shrine)</h4>
         <p>Tell us how you travelled from the nearby town or end of the road to each shrine. For Kedarnath, first choose whether you travelled through Sonprayag/Gaurikund or flew from a helipad. For <span translate="no">Hemkund Sahib</span>, give details for each part of the journey: Govindghat → Pulna, Pulna → Ghangaria, and Ghangaria → <span translate="no">Hemkund Sahib</span>. If your trip is <em>ongoing or planned</em>, enter your intended mode.</p>
@@ -984,6 +985,18 @@
           <label><input type="radio" name="intentToReturn" value="No"> No</label>
           <label><input type="radio" name="intentToReturn" value="Unsure"> Unsure</label>
         </div>
+
+        <section class="journey-visual" id="lastMileJourneyPreview" aria-live="polite">
+          <div class="journey-visual-title">Your shrine approach</div>
+          <p class="journey-visual-empty">Select a last-mile mode to build the route.</p>
+        </section>
+
+        <details class="whole-trip-summary">
+          <summary>See whole trip</summary>
+          <section class="journey-visual" id="wholeTripJourneyPreview" aria-live="polite">
+            <p class="journey-visual-empty">Enter your travel details to see your whole trip.</p>
+          </section>
+        </details>
 
         <div class="nav-buttons">
           <div style="float:left;">
@@ -1231,7 +1244,7 @@
         </div>
 
         <div class="dham-block" id="last-mile-Gangotri-block" style="border-left: 5px solid #4a5a7a; background:#f0f2f7; display: none;">
-            <h4 class="text-xl font-semibold mb-3">📍 Gangotri: Uttarkashi/Harsil → Temple (Near Road-head)</h4>
+            <h4 class="text-xl font-semibold mb-3">📍 Gangotri: Uttarkashi/Harshil → Temple (Near Road-head)</h4>
             <div id="last-mile-Gangotri-tasks"></div>
         </div>
 
@@ -1730,7 +1743,7 @@
   <button id="exportCSV">Export CSV</button>
   <button id="exportXLSX">Export Excel</button>
 
-  <script src="script.js?v=20261020-mobile-controls-4"></script>
+  <script src="script.js?v=20261020-download-trip-1"></script>
 
 </body>
 </html>
