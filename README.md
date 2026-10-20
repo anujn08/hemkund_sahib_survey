@@ -2,7 +2,7 @@
 
 A mobile-friendly research survey about travel to Kedarnath, Badrinath, Gangotri, Yamunotri and Hemkund Sahib in Uttarakhand.
 
-**Website:** https://anujn08.github.io/pilgrimage_survey/
+**Website:** https://anujn08.github.io/hemkund_sahib_survey/
 
 ## Run locally
 
