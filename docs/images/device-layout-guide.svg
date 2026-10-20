@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+<title id="title">Survey layouts on phones, tablets and desktops</title><desc id="desc">Illustrative layout: phone cards use colored shrine headers and selectable buttons; tablets and desktops use tables with dropdowns. The example values are not suggested responses.</desc>
+<rect width="1200" height="650" rx="20" fill="#f0f5f8"/>
+<g font-family="Arial, sans-serif" fill="#214357">
+<text x="38" y="50" font-size="27" font-weight="700">Same questions, a layout for your screen</text>
+<text x="38" y="80" font-size="16">Illustrations only. Select answers that match your own journey.</text>
+<rect x="38" y="110" width="316" height="480" rx="28" fill="white" stroke="#9eb6c4" stroke-width="3"/>
+<rect x="139" y="122" width="114" height="7" rx="4" fill="#9eb6c4"/>
+<text x="58" y="166" font-size="20" font-weight="700">Phone: tap to answer</text>
+<rect x="54" y="188" width="284" height="381" rx="12" fill="#f0f3f8" stroke="#4a5a7a"/>
+<rect x="65" y="200" width="262" height="45" rx="8" fill="#4a5a7a"/>
+<text x="81" y="229" font-size="18" font-weight="700" fill="white">Gangotri</text>
+<text x="68" y="275" font-size="15" font-weight="700">Mode used / intended</text>
+<rect x="68" y="288" width="124" height="43" rx="7" fill="#4a5a7a" stroke="#a9b6ca"/><text x="130.0" y="315" text-anchor="middle" font-size="14" fill="white">Trek / Walk</text>
+<rect x="200" y="288" width="124" height="43" rx="7" fill="white" stroke="#a9b6ca"/><text x="262.0" y="315" text-anchor="middle" font-size="14" fill="#214357">Other</text>
+<rect x="68" y="377" width="124" height="43" rx="7" fill="#4a5a7a" stroke="#a9b6ca"/><text x="130.0" y="404" text-anchor="middle" font-size="14" fill="white">Under 15 min</text>
+<rect x="200" y="377" width="124" height="43" rx="7" fill="white" stroke="#a9b6ca"/><text x="262.0" y="404" text-anchor="middle" font-size="14" fill="#214357">15-30 min</text>
+<rect x="68" y="429" width="124" height="43" rx="7" fill="white" stroke="#a9b6ca"/><text x="130.0" y="456" text-anchor="middle" font-size="14" fill="#214357">31-60 min</text>
+<rect x="200" y="429" width="124" height="43" rx="7" fill="white" stroke="#a9b6ca"/><text x="262.0" y="456" text-anchor="middle" font-size="14" fill="#214357">1-2 hr</text>
+<text x="68" y="363" font-size="15" font-weight="700">One-way time</text>
+<text x="68" y="510" font-size="14">Selected buttons are filled.</text>
+<text x="68" y="537" font-size="14">Each shrine has its own color.</text>
+<rect x="391" y="110" width="770" height="400" rx="18" fill="white" stroke="#9eb6c4" stroke-width="3"/>
+<text x="416" y="156" font-size="20" font-weight="700">Tablet / desktop: compare in a table</text>
+<rect x="415" y="181" width="722" height="66" fill="#e9f1ec"/>
+
+<text x="475.0" y="220" text-anchor="middle" font-size="16" font-weight="700">Shrine</text>
+<text x="650.0" y="220" text-anchor="middle" font-size="16" font-weight="700">Route / Segment</text>
+<text x="860.0" y="220" text-anchor="middle" font-size="16" font-weight="700">Mode used</text>
+<text x="1046.0" y="220" text-anchor="middle" font-size="16" font-weight="700">One-way time</text>
+<rect x="415" y="247" width="722" height="100" fill="#fff" stroke="#d0dde5"/>
+<text x="428" y="302" font-size="15">Yamunotri</text><text x="546" y="302" font-size="14">Janki Chatti to shrine</text>
+<rect x="771" y="271" width="178" height="49" rx="7" fill="#f7fafc" stroke="#bfd0df"/><text x="781" y="301" font-size="15">Pony / Mule</text><path d="M929,291 l5,5 l5,-5" fill="none" stroke="#214357" stroke-width="2"/>
+<rect x="961" y="271" width="164" height="49" rx="7" fill="#f7fafc" stroke="#bfd0df"/><text x="971" y="301" font-size="15">3-6 hr</text><path d="M1105,291 l5,5 l5,-5" fill="none" stroke="#214357" stroke-width="2"/>
+<rect x="415" y="347" width="722" height="100" fill="#f9fbfc" stroke="#d0dde5"/>
+<text x="428" y="402" font-size="15">Gangotri</text><text x="546" y="402" font-size="14">Road-head to shrine</text>
+<rect x="771" y="371" width="178" height="49" rx="7" fill="#f7fafc" stroke="#bfd0df"/><text x="781" y="401" font-size="15">Trek / Walk</text><path d="M929,391 l5,5 l5,-5" fill="none" stroke="#214357" stroke-width="2"/>
+<rect x="961" y="371" width="164" height="49" rx="7" fill="#f7fafc" stroke="#bfd0df"/><text x="971" y="401" font-size="15">Under 15 min</text><path d="M1105,391 l5,5 l5,-5" fill="none" stroke="#214357" stroke-width="2"/>
+<text x="416" y="481" font-size="15">Dropdowns stay in the table; phone buttons are hidden here.</text>
+<text x="394" y="551" font-size="16">A4.2 last-mile and A5 accommodation tables fit tablet widths.</text>
+<text x="394" y="578" font-size="16">Phone layouts apply at screen widths of 600 pixels or less.</text>
+<text x="38" y="625" font-size="14">Choice tasks keep three options side by side on phones, so you can compare them directly.</text>
+</g></svg>

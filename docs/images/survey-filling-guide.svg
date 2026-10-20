@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="730" viewBox="0 0 1200 730" role="img" aria-labelledby="title desc">
+<title id="title">How to complete the pilgrimage travel survey</title><desc id="desc">Read and consent, describe the trip, enter travel details, compare options, add feedback, and submit. Nine question pages follow consent.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#698595"/></marker></defs>
+<rect width="1200" height="730" rx="20" fill="#f0f5f8"/>
+<g font-family="Arial, sans-serif" fill="#214357">
+<text x="42" y="58" font-size="29" font-weight="700">Your survey, step by step</text>
+<text x="42" y="89" font-size="17">Consent first. Then complete nine question pages using Next and Previous.</text>
+<rect x="42" y="124" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="76" cy="161" r="20" fill="#345b70"/><text x="76" y="167" text-anchor="middle" font-size="18" font-weight="700" fill="white">1</text>
+<text x="106" y="168" font-size="20" font-weight="700">Read &amp; agree</text>
+<text x="64" y="215" font-size="16">Choose a language.</text>
+<text x="64" y="244" font-size="16">Read the study introduction.</text>
+<text x="64" y="273" font-size="16">Select I Accept and Agree.</text>
+<path d="M397,228 h23" stroke="#698595" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="424" y="124" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="458" cy="161" r="20" fill="#4e7c5f"/><text x="458" y="167" text-anchor="middle" font-size="18" font-weight="700" fill="white">2</text>
+<text x="488" y="168" font-size="20" font-weight="700">Describe your trip</text>
+<text x="446" y="215" font-size="16">Select the shrines in this trip.</text>
+<text x="446" y="244" font-size="16">Set their visit order and status.</text>
+<text x="446" y="273" font-size="16">Keep future visits separate.</text>
+<path d="M779,228 h23" stroke="#698595" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="806" y="124" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="840" cy="161" r="20" fill="#3a6694"/><text x="840" y="167" text-anchor="middle" font-size="18" font-weight="700" fill="white">3</text>
+<text x="870" y="168" font-size="20" font-weight="700">Record travel &amp; stays</text>
+<text x="828" y="215" font-size="16">Enter mode, time and fare.</text>
+<text x="828" y="244" font-size="16">Add rest stops and shrine stays.</text>
+<text x="828" y="273" font-size="16">Follow the units shown.</text>
+<rect x="42" y="363" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="76" cy="400" r="20" fill="#7a5c2e"/><text x="76" y="406" text-anchor="middle" font-size="18" font-weight="700" fill="white">4</text>
+<text x="106" y="407" font-size="20" font-weight="700">Compare travel options</text>
+<text x="64" y="454" font-size="16">Read all three choice cards.</text>
+<text x="64" y="483" font-size="16">Compare cost, time and service.</text>
+<text x="64" y="512" font-size="16">Choose one option per task.</text>
+<path d="M397,467 h23" stroke="#698595" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="424" y="363" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="458" cy="400" r="20" fill="#4a5a7a"/><text x="458" y="406" text-anchor="middle" font-size="18" font-weight="700" fill="white">5</text>
+<text x="488" y="407" font-size="20" font-weight="700">Share your views</text>
+<text x="446" y="454" font-size="16">Answer train / ropeway questions.</text>
+<text x="446" y="483" font-size="16">Rate your travel priorities.</text>
+<text x="446" y="512" font-size="16">Complete the About you page.</text>
+<path d="M779,467 h23" stroke="#698595" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="806" y="363" width="352" height="208" rx="14" fill="white" stroke="#cad9e1"/>
+<circle cx="840" cy="400" r="20" fill="#2e6b8a"/><text x="840" y="406" text-anchor="middle" font-size="18" font-weight="700" fill="white">6</text>
+<text x="870" y="407" font-size="20" font-weight="700">Review &amp; submit</text>
+<text x="828" y="454" font-size="16">Add ratings and feedback.</text>
+<text x="828" y="483" font-size="16">Return to correct any answers.</text>
+<text x="828" y="512" font-size="16">Select Submit Response.</text>
+<rect x="42" y="626" width="1116" height="64" rx="10" fill="#e2ece8"/>
+<text x="62" y="652" font-size="16" font-weight="700">Helpful reminders</text>
+<text x="62" y="677" font-size="16">One choice per task. Multiple answers only where stated. Correct red-marked answers before continuing.</text>
+</g></svg>
