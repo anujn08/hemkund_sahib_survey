@@ -1,0 +1,35 @@
+# Bot and automation (not part of the survey)
+automation_bot/
+
+# Backups folder
+backups/
+
+# Internal working notes
+Claude outputs/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# Node (if any stray packages end up here)
+node_modules/
+
+# Survey responses and local audit artifacts (never publish)
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+TEST_SURVEY_SUBMISSION.json
+SURVEY_FIELD_SNAPSHOT.csv
+COLUMN_COMPARISON.csv
+README_COLUMN_COMPARISON.md
+WORKBOOK_AUDIT.md
+responsive-welcome-preview.png
+
+# Local Python/build output
+__pycache__/
+.venv/
+_site/
